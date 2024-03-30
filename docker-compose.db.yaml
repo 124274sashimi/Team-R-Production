@@ -1,6 +1,6 @@
 x-db-info: &db-args
   POSTGRES_USER: postgres
-  POSTGRES_PASSWORD: postgres
+  POSTGRES_PASSWORD: TUxW6CQf2qZjYWpobSvx
   POSTGRES_DB: postgres
 
 x-port-bindings:

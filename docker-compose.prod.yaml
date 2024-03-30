@@ -5,13 +5,13 @@ x-prod-args: &prod-args
   PORT: *prod-port # Duplicate this under the name that the env variable will expect. Build args will override as necessary
 
 x-db-info: &db-args
-  POSTGRES_PASSWORD: YOUR_TEAM_PASSWORD
-  POSTGRES_USER: YOUR_TEAM_USERBAME
-  POSTGRES_DB: YOUR_TEAM_DB
+  POSTGRES_PASSWORD: TUxW6CQf2qZjYWpobSvx # was YOUR_TEAM_PASSWORD
+  POSTGRES_USER: postgres                 # was YOUR_TEAM_USERBAME
+  POSTGRES_DB: postgres                   # was YOUR_TEAM_DB
 
 # Port and URL for the DB
 x-db-loc: &db-loc
-  POSTGRES_CONTAINER: YOUR_TEAM_RDS
+  POSTGRES_CONTAINER: team-r-prod.c7scucqw039h.us-east-2.rds.amazonaws.com    # was YOUR_TEAM_RDS
   POSTGRES_PORT: &pg-port "5432"
 
   # The environment variables will expect this to already be formed, build args will override it
@@ -43,7 +43,7 @@ services:
       - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
 
       # Auto-certificate generation parameters
-      - "--certificatesresolvers.letsencrypt.acme.email=mrgosselin@wpi.edu"
+      - "--certificatesresolvers.letsencrypt.acme.email=hhliu@wpi.edu"
       - "--certificatesresolvers.letsencrypt.acme.storage=acme.json"
 
       # Used during resolution
@@ -91,7 +91,7 @@ services:
 
       # Despite the "loadbalancer" naming, this just describes what port this container exposes
       - "traefik.http.services.frontend-https.loadbalancer.server.port=80"
-    image: your_team_docker_repo:frountend
+    image: 124274sashimi/softeng-team-r:frontend
     restart: always
     healthcheck:
       *health-check
@@ -126,7 +126,7 @@ services:
 
       # Despite the "loadbalancer" naming, this just describes what port this container exposes
       - "traefik.http.services.backend-https.loadbalancer.server.port=80"
-    image: your_team_docker_repo:backend
+    image: 124274sashimi/softeng-team-r:backend
     restart: always
     healthcheck:
       *health-check
