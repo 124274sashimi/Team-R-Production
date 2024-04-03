@@ -2,6 +2,8 @@ import app from "../app.ts";
 import http from "http";
 import { AddressInfo } from "net";
 import { createHttpTerminator } from "http-terminator";
+import { processFile } from "../fileUtils.ts";
+import { writeCSVFile } from "../fileUtils.ts";
 
 // Attempt a database connection
 console.info("Connecting to database...");
@@ -66,6 +68,20 @@ export default server;
     process.exit(0); // Exit normally
   });
 });
+
+//execution of processFile() for edges
+const inFilePathEdges: string = "L1Edges.csv"; // constant for input csv file path
+const writeFilePathEdges: string = "outputEdges.csv"; // constant for output csv file path
+processFile(inFilePathEdges).then(
+  () => writeCSVFile(inFilePathEdges, writeFilePathEdges), // .then because it is asychronous and we need to do the process first then the write
+);
+
+//execution of processFile() for nodes
+const inFilePathNodes: string = "L1Nodes.csv"; // constant for input csv file path
+const writeFilePathNodes: string = "outputNodes.csv"; // constant for output csv file path
+processFile(inFilePathNodes).then(() =>
+  writeCSVFile(inFilePathNodes, writeFilePathNodes),
+); // .then because it is asychronous and we need to do the process first then the write
 
 // Listen on the provided port, on all interfaces
 server.listen(port);
