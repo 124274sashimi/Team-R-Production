@@ -7,7 +7,9 @@ const NodeTablePage = () => {
   return (
     <Box display="flex">
       <SideBar />
-      <NodeTable />
+      <div className="overflow-y-auto h-screen">
+        <NodeTable />
+      </div>
     </Box>
   );
 };

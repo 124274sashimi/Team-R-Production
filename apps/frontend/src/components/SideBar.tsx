@@ -1,4 +1,8 @@
+// import MapIcon from '@mui/icons-material/Map';
+// import LoginIcon from '@mui/icons-material/Login';
 import { Logout, UploadFile } from "@mui/icons-material";
+// import RoomServiceIcon from '@mui/icons-material/RoomService';
+// import LastPageIcon from '@mui/icons-material/LastPage';
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import AccessibleForwardIcon from "@mui/icons-material/AccessibleForward";
 import { ReactNode, useState } from "react";
@@ -8,7 +12,14 @@ import TableViewIcon from "@mui/icons-material/TableView";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import { useNavigate, useLocation } from "react-router-dom";
 import AirlineSeatFlatAngledIcon from "@mui/icons-material/AirlineSeatFlatAngled";
+// import {IconType} from "react-icons";
+// import {SvgIconComponent} from "@mui/icons-material";
+// import {Collapse} from "@mui/material";
 
+// interface SidebarProps {
+//     handleOpenServiceRequestModal: () => void;
+//     handleOpenNavigationScreenModal: () => void;
+// }
 interface Menu {
   title: string;
   icon: ReactNode;
@@ -121,7 +132,7 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="flex">
+    <div className="flex h-screen">
       <div
         className={`bg-primary h-full p-5 pt-9 flex flex-col drop-shadow-2xl justify-between ${
           open ? "w-72" : "w-20"
@@ -145,7 +156,7 @@ export default function Sidebar() {
             className="w-10 rounded cursor-pointer block float-left mr-2"
             src="/src/assets/Brigham_and_Womens_Hospital_logo.svg.png"
             alt={""}
-            onClick={() => setActiveMenu(home.title)}
+            onClick={() => handleMenuClick(home.title)}
           ></img>
           <h1
             className={`text-white pl-5 origin-left font-medium text-2xl duration-300 ${

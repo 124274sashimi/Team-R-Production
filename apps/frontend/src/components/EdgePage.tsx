@@ -7,7 +7,9 @@ const EdgeTablePage = () => {
   return (
     <Box display="flex">
       <SideBar />
-      <EdgeTable />
+      <div className="overflow-y-auto h-screen">
+        <EdgeTable />
+      </div>
     </Box>
   );
 };
