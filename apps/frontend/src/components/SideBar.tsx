@@ -1,6 +1,6 @@
 // import MapIcon from '@mui/icons-material/Map';
 // import LoginIcon from '@mui/icons-material/Login';
-import { Logout, UploadFile } from "@mui/icons-material";
+import { Logout } from "@mui/icons-material";
 // import RoomServiceIcon from '@mui/icons-material/RoomService';
 // import LastPageIcon from '@mui/icons-material/LastPage';
 import FirstPageIcon from "@mui/icons-material/FirstPage";
@@ -11,7 +11,7 @@ import { RiHome3Fill } from "react-icons/ri";
 import TableViewIcon from "@mui/icons-material/TableView";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import { useNavigate, useLocation } from "react-router-dom";
-import AirlineSeatFlatAngledIcon from "@mui/icons-material/AirlineSeatFlatAngled";
+import EditIcon from "@mui/icons-material/Edit";
 // import {IconType} from "react-icons";
 // import {SvgIconComponent} from "@mui/icons-material";
 // import {Collapse} from "@mui/material";
@@ -35,24 +35,25 @@ export default function Sidebar() {
     title: "Service Request Table",
     icon: <TableViewIcon />,
   };
+  const editmap: Menu = { title: "Edit Map", icon: <EditIcon /> };
+
   const logout: Menu = { title: "Logout", icon: <Logout /> };
-  const edges: Menu = { title: "Edge Table", icon: <AccessibleForwardIcon /> };
-  const nodes: Menu = {
-    title: "Node Table",
-    icon: <AirlineSeatFlatAngledIcon />,
+  const nodes_edges: Menu = {
+    title: "Node/Edge Table",
+    icon: <AccessibleForwardIcon />,
   };
-  const uploadCSV: Menu = { title: "Upload CSV", icon: <UploadFile /> };
+  // const uploadCSV: Menu = { title: "Upload CSV", icon: <UploadFile /> };
   const downloadCSV: Menu = {
-    title: "Download CSV",
+    title: "Upload/Download CSV",
     icon: <CloudDownloadIcon />,
   };
   const Menus: Menu[] = [
     home,
+    editmap,
     serviceRequest,
     serviceRequestTable,
-    edges,
-    nodes,
-    uploadCSV,
+    nodes_edges,
+    // uploadCSV,
     downloadCSV,
     logout,
   ];
@@ -67,26 +68,29 @@ export default function Sidebar() {
     case "/servicerequest":
       menuHighlight = "Service Request";
       break;
-    case "/login":
+    case "/":
       menuHighlight = "Login";
       break;
     case "/home":
       menuHighlight = "Home";
       break;
+    case "/editmap":
+      menuHighlight = "Edit Map";
+      break;
     case "/service-request-table":
       menuHighlight = "Service Request Table";
       break;
-    case "/edge-table":
-      menuHighlight = "Edge Table";
+    case "/node-edge-table":
+      menuHighlight = "Node/Edge Table";
       break;
-    case "/node-table":
-      menuHighlight = "Node Table";
+    case "/upload-download-csv":
+      menuHighlight = "Upload/Download CSV";
       break;
-    case "/upload-csv":
-      menuHighlight = "Upload CSV";
-      break;
-    case "/download-csv":
-      menuHighlight = "Download CSV";
+    // case "/download-csv":
+    //   menuHighlight = "Download CSV";
+    //   break;
+    case "/logout":
+      menuHighlight = "Logout";
       break;
     default:
       menuHighlight = "Home";
@@ -114,27 +118,27 @@ export default function Sidebar() {
     if (title === "Service Request Table") {
       routeChange("service-request-table");
     }
-    if (title === "Edge Table") {
-      routeChange("edge-table");
+    if (title === "Edit Map") {
+      routeChange("editmap");
     }
-    if (title === "Node Table") {
-      routeChange("node-table");
+    if (title === "Node/Edge Table") {
+      routeChange("node-edge-table");
     }
     if (title === "Home") {
       routeChange("home");
     }
-    if (title === "Upload CSV") {
-      routeChange("upload-csv");
+    if (title === "Upload/Download CSV") {
+      routeChange("upload-download-csv");
     }
-    if (title === "Download CSV") {
-      routeChange("download-csv");
-    }
+    // if (title === "Download CSV") {
+    //   routeChange("download-csv");
+    // }
   };
 
   return (
     <div className="flex h-screen">
       <div
-        className={`bg-primary h-full p-5 pt-9 flex flex-col drop-shadow-2xl justify-between ${
+        className={`bg-primary h-full p-5 pt-9 flex flex-col drop-shadow-2xl justify-between rounded-r-xl ${
           open ? "w-72" : "w-20"
         } duration-300 relative`}
       >
@@ -173,15 +177,15 @@ export default function Sidebar() {
               key={index}
               className={`text-white text-2xl flex items-center gap-x-10 cursor-pointer p-2 rounded-md mt-2 hover:border-r-4 hover:border-secondary${
                 activeMenu === menu.title
-                  ? "border-r-4 border-tertiary bg-opacity-75"
-                  : "hover:bg-blue-300"
+                  ? "border-r-4 border-tertiary bg-tertiary/25"
+                  : "hover:bg-blue-300 hover:bg-secondary/25"
               }`}
               style={{ height: "3.5rem" }}
               onClick={() => handleMenuClick(menu.title)}
             >
               <span
                 className={`${
-                  activeMenu === menu.title ? "text-tertiary" : "text-white"
+                  activeMenu === menu.title ? "text-tertiary" : "text-secondary"
                 }`}
               >
                 {menu.icon}
@@ -201,7 +205,7 @@ export default function Sidebar() {
 
         <div className="pb-2">
           <li
-            className="text-white text-2xl flex items-center gap-x-8 cursor-pointer p-2 hover:bg-blue-300 rounded-md mt-2"
+            className="text-white text-2xl flex items-center gap-x-8 cursor-pointer p-2 hover:bg-blue-300 hover:bg-secondary/25 hover:border-r-4 rounded-md mt-2"
             onClick={() => setOpen(!open)}
           >
             <span>

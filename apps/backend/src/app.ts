@@ -8,6 +8,10 @@ import allEdgesRouter from "./routes/allEdgesRouter.ts";
 import pathfindRouter from "./routes/pathfind.ts";
 import serviceRequestRouter from "./routes/serviceRequestRouter.ts";
 import CSVRouter from "./routes/CSVRouter.ts";
+import editServiceRequestRouter from "./routes/editServiceRequestRouter.ts";
+import delServiceRequestRouter from "./routes/delServiceRequestRouter.ts";
+import editEdgeRouter from "./routes/editEdgeRouter.ts";
+import editNodeRouter from "./routes/editNodeRouter.ts";
 
 const app: Express = express(); // Setup the backend
 
@@ -35,6 +39,10 @@ app.use("/api/service/create", serviceRequestRouter);
 app.use("/api/admin/allnodes", allNodesRouter); //GET request for all Nodes Data
 app.use("/api/map/pathfind", pathfindRouter);
 app.use("/api/admin/csv", CSVRouter);
+app.use("/api/admin/service/edit", editServiceRequestRouter);
+app.use("/api/admin/service/del", delServiceRequestRouter);
+app.use("/api/admin/edge/edit", editEdgeRouter);
+app.use("/api/admin/node/edit", editNodeRouter);
 
 /**
  * Catch all 404 errors, and forward them to the error handler
