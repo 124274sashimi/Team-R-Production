@@ -8,11 +8,11 @@ import SVGCanvas from "../components/SVGCanvas.tsx";
 // import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Nodes } from "database";
-//import { Stack } from "react-bootstrap";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { Button, ButtonGroup } from "@mui/material";
 import ZoomOutIcon from "@mui/icons-material/ZoomOut";
+
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import lowerLevel1Map from "../assets/maps/00_thelowerlevel1.png";
 import lowerLevel2Map from "../assets/maps/00_thelowerlevel2.png";
@@ -23,6 +23,8 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { ThemeProvider } from "@mui/material";
 import { appTheme } from "../Interfaces/MuiTheme.ts";
+import "../styles/MainPage.css";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const autocompleteStyle = {
   "& .MuiInputBase-input": { color: "white" },
@@ -47,14 +49,20 @@ const floors = [
 ];
 
 export default function MainPage() {
+  //Use auth0 react hook
+  const { getAccessTokenSilently } = useAuth0();
+
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [nodes, setNodes] = useState<Nodes[]>();
-  const [path, setPath] = React.useState<Nodes[]>([]);
+  const [path, setPath] = useState<Nodes[]>([]);
   const [currentMap, setCurrentMap] = useState(lowerLevel1Map);
   const [hoveredNode, setHoveredNode] = useState<Nodes | undefined>();
-  const [clickedNode, setClickedNode] = React.useState<Nodes | undefined>();
-
+  const [clickedNode, setClickedNode] = useState<Nodes | undefined>();
+  const [clickTimes, setClickTimes] = useState<number>(0);
+  const [pathfindingAlgorithm, setPathfindingAlgorithm] =
+    useState("/api/map/pathfind");
+  const [showPathOnly, setShowPathOnly] = useState(false);
   // const navigate = useNavigate();
   // const routeChange = (path: string) => {
   //   const newPath = `/${path}`;
@@ -70,8 +78,12 @@ export default function MainPage() {
     }
 
     fetchData().then();
-  }, []);
+  }, [getAccessTokenSilently]);
   console.log(nodes);
+
+  function handleMapChange(newMap: string) {
+    setCurrentMap(newMap);
+  }
 
   const Locations = nodes?.map((node: Nodes) => node.LongName) || [];
   Locations.sort((longname1, longname2) => {
@@ -83,6 +95,13 @@ export default function MainPage() {
       return 0;
     }
   });
+
+  const resetCanvas = () => {
+    setShowPathOnly(false);
+    setPath([]); // Clear the path
+    setStart(""); // Clear the start location
+    setEnd(""); // Clear the end location
+  };
 
   async function getDirections() {
     const startNodeArray = nodes?.filter(
@@ -96,9 +115,7 @@ export default function MainPage() {
       endNodeArray.length > 0
     ) {
       const startNode: string = startNodeArray[0]["NodeID"];
-      // console.log("starting node floor" + startNodeArray[0].Floor);
       const startingFloor: string = startNodeArray[0].Floor;
-      console.log("starting floor:" + startingFloor);
       switch (startingFloor) {
         case "L1":
           setCurrentMap(lowerLevel1Map);
@@ -119,12 +136,13 @@ export default function MainPage() {
           setCurrentMap(lowerLevel1Map);
       }
       const endNode: string = endNodeArray[0]["NodeID"];
-      const res = await axios.get("/api/map/pathfind", {
+      const res = await axios.get(pathfindingAlgorithm, {
         params: {
           startNodeID: startNode,
           endNodeID: endNode,
         },
       });
+      setShowPathOnly(true);
       if (res.status === 200) {
         console.log("Successfully fetched path");
       } else {
@@ -135,7 +153,6 @@ export default function MainPage() {
     } else {
       console.error("Start or end node not found");
     }
-    // routeChange("home");
   }
 
   return (
@@ -145,19 +162,21 @@ export default function MainPage() {
     >
       <SideBar />
       <main className="flex content-center justify-center leading-none relative">
-        <div id="map" className="relative">
-          <TransformWrapper alignmentAnimation={{ sizeX: 0, sizeY: 0 }}>
-            {({ zoomIn, zoomOut, resetTransform }) => (
-              <section>
-                <ThemeProvider theme={appTheme}>
-                  <ButtonGroup
-                    variant="contained"
-                    className="flex absolute top-1 left-1 z-10"
-                  >
+        <TransformWrapper alignmentAnimation={{ sizeX: 0, sizeY: 0 }}>
+          {}
+          {({ zoomIn, zoomOut, resetTransform }) => (
+            <section id="map">
+              <ThemeProvider theme={appTheme}>
+                <div id="controls">
+                  <ButtonGroup variant="contained">
                     <Button
                       onClick={() => zoomOut()}
                       children={<ZoomOutIcon />}
                       className="p-1"
+                      sx={{
+                        borderTopLeftRadius: "0.75rem",
+                        borderBottomLeftRadius: "0.75rem",
+                      }}
                     />
                     <Button
                       onClick={() => resetTransform()}
@@ -167,10 +186,18 @@ export default function MainPage() {
                       onClick={() => zoomIn()}
                       children={<ZoomInIcon />}
                       className="p-1"
+                      sx={{
+                        borderTopRightRadius: "0.75rem",
+                        borderBottomRightRadius: "0.75rem",
+                      }}
                     />
+                  </ButtonGroup>
+                  <ButtonGroup variant="contained">
                     <Select
-                      value={currentMap}
-                      onChange={(event) => setCurrentMap(event.target.value)}
+                      value={pathfindingAlgorithm}
+                      onChange={(event) =>
+                        setPathfindingAlgorithm(event.target.value)
+                      }
                       sx={{
                         backgroundColor: "primary.main",
                         color: "white",
@@ -180,34 +207,75 @@ export default function MainPage() {
                         "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
                           borderColor: "white",
                         },
+                        borderTopLeftRadius: "0.75rem",
+                        borderBottomLeftRadius: "0.75rem",
+                        borderTopRightRadius: "0.75rem",
+                        borderBottomRightRadius: "0.75rem",
                       }}
                     >
-                      {floors.map((floor, index) => (
-                        <MenuItem key={index} value={floor.map}>
-                          {floor.name}
-                        </MenuItem>
-                      ))}
+                      <MenuItem value="/api/map/pathfind">A*</MenuItem>
+                      <MenuItem value="/api/map/pathfind/bfs">
+                        Breadth-First Search
+                      </MenuItem>
+                      <MenuItem value="/api/map/pathfind/dfs">
+                        Depth-First Search
+                      </MenuItem>
+                      <MenuItem value="/api/map/pathfind/djikstra">
+                        Djikstra's
+                      </MenuItem>
                     </Select>
                   </ButtonGroup>
-                </ThemeProvider>
-                <TransformComponent>
-                  <SVGCanvas
-                    key={currentMap}
-                    path={path}
-                    currentMap={currentMap}
-                    currentLevel={
-                      floors.find((floor) => floor.map === currentMap)?.level ||
-                      ""
+                  <Select
+                    value={currentMap}
+                    onChange={(event) => setCurrentMap(event.target.value)}
+                    sx={{
+                      backgroundColor: "primary.main",
+                      color: "white",
+                      "&:hover": {
+                        backgroundColor: "primary.dark",
+                      },
+                      "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "white",
+                      },
+                    }}
+                  >
+                    {floors.map((floor, index) => (
+                      <MenuItem key={index} value={floor.map}>
+                        {floor.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </div>
+              </ThemeProvider>
+              <TransformComponent>
+                <SVGCanvas
+                  key={currentMap}
+                  path={path}
+                  currentMap={currentMap}
+                  setCurrentMap={handleMapChange}
+                  currentLevel={
+                    floors.find((floor) => floor.map === currentMap)?.level ||
+                    ""
+                  }
+                  handleNodeHover={setHoveredNode}
+                  handleNodeClicked={(node) => {
+                    const newClickTimes = clickTimes + 1;
+                    setClickTimes(newClickTimes);
+                    if (newClickTimes % 2 === 1) {
+                      setStart(node ? node.LongName : "");
+                    } else {
+                      setEnd(node ? node.LongName : "");
                     }
-                    handleNodeHover={setHoveredNode}
-                    handleNodeClicked={setClickedNode}
-                    isHome={true}
-                  />
-                </TransformComponent>
-              </section>
-            )}
-          </TransformWrapper>
-        </div>
+                    setClickedNode(node);
+                  }}
+                  isHome={true}
+                  showPathOnly={showPathOnly}
+                  allnodes={nodes}
+                />
+              </TransformComponent>
+            </section>
+          )}
+        </TransformWrapper>
       </main>
       <aside className="bg-primary text-secondary flex-shrink fixed top-0 right-0 h-full rounded-l-xl">
         <h1 className="text-xl bg-transparent p-2 text-center">
@@ -255,7 +323,16 @@ export default function MainPage() {
           >
             Get Directions
           </Button>
+          <Button
+            className="content-center"
+            variant="contained"
+            color="secondary"
+            onClick={resetCanvas}
+          >
+            Reset Map
+          </Button>
         </div>
+
         {hoveredNode && (
           <div
             style={{

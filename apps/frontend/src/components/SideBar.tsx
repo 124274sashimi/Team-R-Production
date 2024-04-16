@@ -5,13 +5,14 @@ import { Logout } from "@mui/icons-material";
 // import LastPageIcon from '@mui/icons-material/LastPage';
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import AccessibleForwardIcon from "@mui/icons-material/AccessibleForward";
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { BsBellFill } from "react-icons/bs";
 import { RiHome3Fill } from "react-icons/ri";
 import TableViewIcon from "@mui/icons-material/TableView";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import { useNavigate, useLocation } from "react-router-dom";
 import EditIcon from "@mui/icons-material/Edit";
+import { useAuth0 } from "@auth0/auth0-react";
 // import {IconType} from "react-icons";
 // import {SvgIconComponent} from "@mui/icons-material";
 // import {Collapse} from "@mui/material";
@@ -23,29 +24,55 @@ import EditIcon from "@mui/icons-material/Edit";
 interface Menu {
   title: string;
   icon: ReactNode;
+  displayLoggedIn: boolean;
 }
 
 export default function Sidebar() {
-  const home: Menu = { title: "Home", icon: <RiHome3Fill /> };
+  // Use the Auth0 React hook to handle authentication.
+  const {
+    isAuthenticated,
+    isLoading,
+    loginWithRedirect,
+    getAccessTokenSilently,
+    logout,
+  } = useAuth0();
+
+  const home: Menu = {
+    title: "Home",
+    icon: <RiHome3Fill />,
+    displayLoggedIn: false,
+  };
   const serviceRequest: Menu = {
     title: "Service Request",
     icon: <BsBellFill />,
+    displayLoggedIn: true,
   };
   const serviceRequestTable: Menu = {
     title: "Service Request Table",
     icon: <TableViewIcon />,
+    displayLoggedIn: true,
   };
-  const editmap: Menu = { title: "Edit Map", icon: <EditIcon /> };
+  const editmap: Menu = {
+    title: "Edit Map",
+    icon: <EditIcon />,
+    displayLoggedIn: true,
+  };
 
-  const logout: Menu = { title: "Logout", icon: <Logout /> };
+  const logoutOption: Menu = {
+    title: "Logout",
+    icon: <Logout />,
+    displayLoggedIn: false,
+  };
   const nodes_edges: Menu = {
     title: "Node/Edge Table",
     icon: <AccessibleForwardIcon />,
+    displayLoggedIn: true,
   };
   // const uploadCSV: Menu = { title: "Upload CSV", icon: <UploadFile /> };
   const downloadCSV: Menu = {
     title: "Upload/Download CSV",
     icon: <CloudDownloadIcon />,
+    displayLoggedIn: true,
   };
   const Menus: Menu[] = [
     home,
@@ -55,11 +82,43 @@ export default function Sidebar() {
     nodes_edges,
     // uploadCSV,
     downloadCSV,
-    logout,
+    logoutOption,
   ];
 
   const location = useLocation();
   const currentURL = location.pathname;
+
+  // This useEffect hook is responsible for refreshing the access token when necessary.
+  useEffect(
+    () => {
+      // Define an asynchronous function to refresh the access token.
+      const refreshToken = async () => {
+        try {
+          await getAccessTokenSilently();
+        } catch (error) {
+          // If an error occurs during token refresh, redirect the user to the login page.
+          await loginWithRedirect({
+            appState: {
+              returnTo: location.pathname,
+            },
+          });
+        }
+      };
+
+      // Check if authentication is not in progress and the user is authenticated.
+      if (!isLoading && isAuthenticated) {
+        refreshToken().then();
+      }
+    },
+    // Dependencies array to re-run the effect when any of these values change.
+    [
+      getAccessTokenSilently, // Auth0 hook for getting access token.
+      loginWithRedirect, // Auth0 hook for redirecting to login page.
+      location.pathname, // Pathname of the current location.
+      isLoading, // Boolean indicating whether authentication is in progress.
+      isAuthenticated, // Boolean indicating whether the user is authenticated.
+    ],
+  );
 
   let menuHighlight: string = "";
   console.log({ currentURL });
@@ -102,37 +161,52 @@ export default function Sidebar() {
   const collapse = { title: "Collapse", icon: <FirstPageIcon /> };
 
   const navigate = useNavigate();
+
+  // Define a function to change the route/navigation within the application.
   const routeChange = (path: string) => {
     const newPath = `/${path}`;
-    navigate(newPath);
+    navigate(newPath); //  Navigate to new path within the application
   };
 
+  // Define a function to handle clicks on the menu items.
   const handleMenuClick = (title: string) => {
+    // Set the active menu to the clicked menu item's title.
     setActiveMenu(title);
+
+    // Handle different menu item clicks.
     if (title === "Logout") {
-      routeChange("");
-    }
-    if (title === "Service Request") {
+      // If the user clicks Logout and is authenticated and not loading,
+      // initiate logout process and redirect to the home page after logout.
+      if (isAuthenticated && !isLoading) {
+        logout({
+          logoutParams: {
+            returnTo: window.location.origin,
+          },
+        }).then();
+      } else {
+        // If the user is not authenticated or is still loading,
+        // call routeChange function to the home page.
+        routeChange("");
+      }
+    } else if (title === "Service Request") {
+      // Redirect to the service request page.
       routeChange("servicerequest");
-    }
-    if (title === "Service Request Table") {
+    } else if (title === "Service Request Table") {
+      // Redirect to the service request table page.
       routeChange("service-request-table");
-    }
-    if (title === "Edit Map") {
+    } else if (title === "Edit Map") {
+      // Redirect to the edit map page.
       routeChange("editmap");
-    }
-    if (title === "Node/Edge Table") {
+    } else if (title === "Node/Edge Table") {
+      // Redirect to the node/edge table page.
       routeChange("node-edge-table");
-    }
-    if (title === "Home") {
+    } else if (title === "Home") {
+      // Redirect to the home page.
       routeChange("home");
-    }
-    if (title === "Upload/Download CSV") {
+    } else if (title === "Upload/Download CSV") {
+      // Redirect to the upload/download CSV page.
       routeChange("upload-download-csv");
     }
-    // if (title === "Download CSV") {
-    //   routeChange("download-csv");
-    // }
   };
 
   return (
@@ -172,10 +246,16 @@ export default function Sidebar() {
         </div>
 
         <ul className="pt-2">
-          {Menus.map((menu, index) => (
+          {Menus.filter(
+            // Filter the menu items based on whether the user is authenticated
+            // or what menu items should be displayed even when the user is not logged in,
+            // and ensure that the loading state is false.
+            (menu: Menu) =>
+              (isAuthenticated || !menu.displayLoggedIn) && !isLoading,
+          ).map((menu, index) => (
             <li
               key={index}
-              className={`text-white text-2xl flex items-center gap-x-10 cursor-pointer p-2 rounded-md mt-2 hover:border-r-4 hover:border-secondary${
+              className={`text-white text-2xl flex items-center gap-x-5 cursor-pointer p-2 rounded-md mt-2 hover:border-r-4 hover:border-secondary${
                 activeMenu === menu.title
                   ? "border-r-4 border-tertiary bg-tertiary/25"
                   : "hover:bg-blue-300 hover:bg-secondary/25"
