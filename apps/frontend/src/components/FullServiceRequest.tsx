@@ -34,6 +34,7 @@ import { RequestContext } from "../App.tsx";
 import Autocomplete from "@mui/material/Autocomplete";
 import { Nodes } from "database";
 import axios from "axios";
+import { useAuth0 } from "@auth0/auth0-react";
 
 // import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 // import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -48,7 +49,27 @@ export interface ListOfServices {
 }
 
 //Define functions for "My Request" log
+
+// This function logs service requests and requires a list of available services as input.
 function ServiceRequestLog({ availableServices }: ListOfServices) {
+  // Use the Auth0 React hook to handle authentication.
+  const {
+    getAccessTokenSilently,
+    isLoading,
+    isAuthenticated,
+    loginWithRedirect,
+  } = useAuth0();
+
+  // Check if authentication is not in progress and the user is not authenticated.
+  if (!isLoading && !isAuthenticated) {
+    // Redirect user to login page with return state to the current location.
+    loginWithRedirect({
+      appState: {
+        returnTo: location.pathname,
+      },
+    }).then();
+  }
+
   /*DefaultServiceRequest is the default state of the Service Request object, where everything is empty*/
   const defaultServiceRequest: ServiceRequest = {
     requesterName: "",
@@ -64,8 +85,10 @@ function ServiceRequestLog({ availableServices }: ListOfServices) {
 
   const [nodes, setNodes] = useState<Nodes[]>();
 
-  // const [room, setRoom] = useState("");
+  // Create an array of location names from the nodes array if it exists, otherwise initialize an empty array.
   const Locations = nodes?.map((node: Nodes) => node.LongName) || [];
+
+  // Sort the location names alphabetically
   Locations.sort((longname1, longname2) => {
     if (longname1 > longname2) {
       return 1;
@@ -78,9 +101,10 @@ function ServiceRequestLog({ availableServices }: ListOfServices) {
 
   useEffect(() => {
     async function fetchData() {
+      // Get all node data not including hallways from backend
       const res = await axios.get("/api/admin/allnodes/NoHall");
       const allNodes = res.data;
-      setNodes(allNodes);
+      setNodes(allNodes); //Populate nodes array with data from backend
       console.log("successfully got data from get request");
     }
 
@@ -92,14 +116,16 @@ function ServiceRequestLog({ availableServices }: ListOfServices) {
     useState<ServiceRequest>(defaultServiceRequest);
 
   /*requests handles the list of service requests, which is used for the list on the side of the page*/
-  // const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const { requests, setRequests } = useContext(RequestContext);
+  //sets the contents on the page based on what the service request is
   let contentComponent: JSX.Element | null = null;
   //Function to test if my request updates when submit an order
   //ToDo: Can delete once combine with actual submitRequest
   //ToDo: check for item having been selected
   const switchService = (service: string) => {
-    switch (service) {
+    switch (
+      service //Changes service request page inputs based on the service selected
+    ) {
       case "Flowers":
         contentComponent = (
           <>
@@ -115,6 +141,7 @@ function ServiceRequestLog({ availableServices }: ListOfServices) {
                         className=""
                         src={Flower1}
                         onClick={() =>
+                          //Populates the details1 variable for singleServiceRequest object based on image clicked
                           setSingleServiceRequest({
                             ...singleServiceRequest,
                             details1: "Daffodil",
@@ -269,8 +296,9 @@ function ServiceRequestLog({ availableServices }: ListOfServices) {
     return contentComponent;
   };
 
-  const submitRequest = () => {
+  const submitRequest = async () => {
     console.log("submitting");
+    const token = await getAccessTokenSilently();
 
     if (
       singleServiceRequest.requesterName &&
@@ -278,7 +306,7 @@ function ServiceRequestLog({ availableServices }: ListOfServices) {
       singleServiceRequest.deliveryDate
     ) {
       setRequests([...requests, singleServiceRequest]);
-      submitRequestDB(singleServiceRequest).then();
+      submitRequestDB(singleServiceRequest, token).then();
       clearForm();
     }
   };
@@ -600,7 +628,7 @@ function ServiceRequestLog({ availableServices }: ListOfServices) {
                             <input
                               type="number"
                               id="dosage"
-                              min = "0"
+                              min="0"
                               className="flex-1 bg-white border border-gray-300 text-gray-900 text-sm rounded-l-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
                               placeholder="Dosage"
                               // value={dosage}
@@ -726,7 +754,10 @@ function ServiceRequestLog({ availableServices }: ListOfServices) {
                   <Button
                     variant="contained"
                     color="success"
-                    onClick={submitRequest}
+                    // Calls submit request function which sends information to the backend
+                    onClick={() => {
+                      submitRequest();
+                    }}
                   >
                     Submit Request
                   </Button>

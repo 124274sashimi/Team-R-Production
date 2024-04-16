@@ -1,6 +1,8 @@
 import express, { Router, Request, Response } from "express";
 import { Graph } from "../graph.ts";
 import { PrismaClient } from "database";
+import { findpath } from "../findpath.ts";
+
 const prisma = new PrismaClient();
 
 const router: Router = express.Router();
@@ -30,7 +32,65 @@ router.get(
 
     const graph = await createGraph();
 
-    const path: string[] = graph.AStar(startNodeID, endNodeID);
+    //const path: string[] = graph.AStar(startNodeID, endNodeID);
+    const path: string[] = findpath.doAlgo(
+      graph,
+      "AStar",
+      startNodeID,
+      endNodeID,
+    );
+    console.log(path);
+
+    // Check if the path is empty
+    if (path.length === 0) {
+      res.sendStatus(204); // and send 204, no data
+      return;
+    }
+    res.send(
+      await Promise.all(
+        path.map(async (nodeID) => {
+          return prisma.nodes.findUniqueOrThrow({
+            where: {
+              NodeID: nodeID,
+            },
+          });
+        }),
+      ),
+    );
+  },
+);
+
+// Find a path to the end node using Dijkstra's
+router.get(
+  "/dijkstra",
+  async function (
+    req: Request<
+      object,
+      object,
+      object,
+      {
+        startNodeID?: string;
+        endNodeID?: string;
+      }
+    >,
+    res: Response,
+  ): Promise<void> {
+    const { startNodeID, endNodeID } = req.query;
+
+    // Validate query params before continuing
+    if (startNodeID == undefined || endNodeID == undefined) {
+      res.status(400).send("startNodeID and/or endNodeID is required");
+      return;
+    }
+
+    const graph = await createGraph();
+
+    const path: string[] = findpath.doAlgo(
+      graph,
+      "Dijkstra",
+      startNodeID,
+      endNodeID,
+    );
     console.log(path);
 
     // Check if the path is empty
@@ -77,7 +137,12 @@ router.get(
 
     const graph = await createGraph();
 
-    const path: string[] = graph.BFS(startNodeID, endNodeID);
+    const path: string[] = findpath.doAlgo(
+      graph,
+      "BFS",
+      startNodeID,
+      endNodeID,
+    );
     console.log(path);
 
     // Check if the path is empty
@@ -99,6 +164,57 @@ router.get(
   },
 );
 
+// Find a path to the end node using a DFS
+router.get(
+  "/dfs",
+  async function (
+    req: Request<
+      object,
+      object,
+      object,
+      {
+        startNodeID?: string;
+        endNodeID?: string;
+      }
+    >,
+    res: Response,
+  ): Promise<void> {
+    const { startNodeID, endNodeID } = req.query;
+
+    // Validate query params before continuing
+    if (startNodeID == undefined || endNodeID == undefined) {
+      res.status(400).send("startNodeID and/or endNodeID is required");
+      return;
+    }
+
+    const graph = await createGraph();
+
+    const path: string[] = findpath.doAlgo(
+      graph,
+      "DFS",
+      startNodeID,
+      endNodeID,
+    );
+    console.log(path);
+
+    // Check if the path is empty
+    if (path.length === 0) {
+      res.sendStatus(204); // and send 204, no data
+      return;
+    }
+    res.send(
+      await Promise.all(
+        path.map(async (nodeID) => {
+          return prisma.nodes.findUniqueOrThrow({
+            where: {
+              NodeID: nodeID,
+            },
+          });
+        }),
+      ),
+    );
+  },
+);
 async function createGraph(): Promise<Graph> {
   const floorToZMap = new Map<string, number>();
   floorToZMap.set("L1", -100);
