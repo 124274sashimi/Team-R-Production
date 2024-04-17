@@ -7,8 +7,7 @@ import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import SVGCanvas from "../components/SVGCanvas.tsx";
 import axios from "axios";
 import { Edges, Nodes } from "database";
-import { Stack } from "react-bootstrap";
-import { Button, ButtonGroup, MenuItem } from "@mui/material";
+import { Button, ButtonGroup, MenuItem, Stack } from "@mui/material";
 import ZoomOutIcon from "@mui/icons-material/ZoomOut";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import lowerLevel1Map from "../assets/maps/00_thelowerlevel1.png";
@@ -18,6 +17,7 @@ import secondFloorMap from "../assets/maps/02_thesecondfloor.png";
 import thirdFloorMap from "../assets/maps/03_thethirdfloor.png";
 import Select from "@mui/material/Select";
 import { useAuth0 } from "@auth0/auth0-react";
+import "../styles/MapEditing.css";
 // import { EditableEdgeContext } from "../App.tsx";
 
 //import Table Items
@@ -32,8 +32,8 @@ import { appTheme } from "../Interfaces/MuiTheme.ts";
 import { ThemeProvider } from "@mui/material";
 
 const floors = [
-  { name: "Lower Level 1", map: lowerLevel1Map, level: "L1" },
   { name: "Lower Level 2", map: lowerLevel2Map, level: "L2" },
+  { name: "Lower Level 1", map: lowerLevel1Map, level: "L1" },
   { name: "First Floor", map: firstFloorMap, level: "1" },
   { name: "Second Floor", map: secondFloorMap, level: "2" },
   { name: "Third Floor", map: thirdFloorMap, level: "3" },
@@ -62,13 +62,15 @@ export default function MapEditing() {
   const [editableEdge, setEditableEdge] = useState<Edges | undefined>();
   const [editableNode, setEditableNode] = useState<Nodes | undefined>();
 
+  // handles nodeClicked and editableNode useState whenever node is clicked
   const handleNodeClick = (node: Nodes | undefined) => {
     setNodeClicked(node);
     if (node) {
-      setEditableNode({ ...node });
+      setEditableNode({ ...node }); // Handles clicked node and sets it as editable
     }
   };
 
+  // handles edgeClicked and editableEdge useState whenever edge is clicked
   const handleEdgeClicked = (edge: Edges | undefined) => {
     setEdgeClicked(edge);
     if (edge) {
@@ -76,23 +78,29 @@ export default function MapEditing() {
     }
   };
 
+  //
+
   useEffect(() => {
     async function fetchData() {
+      // GET request from backend to populate nodes data
       const res = await axios.get("/api/admin/allnodes/All");
       const allNodes = res.data;
       setNodesData(allNodes);
       console.log("successfully got data from get request");
     }
+    // Call the fetchData function when the component mounts or when setEditableNode or setEditableEdge change
     fetchData().then();
   }, [setEditableNode, setEditableEdge]);
   console.log(nodesData);
 
+  //This function asynchronously edits a node's information in the database
   const editNodeDB = async (
     nodeID: string,
     changeField: string,
     newVal: string,
   ) => {
-    const token = await getAccessTokenSilently();
+    const token = await getAccessTokenSilently(); //Retrieve an access token asynchronously
+    //Send POST request to update the node's information
     await axios.post(
       `/api/admin/node/edit/${nodeID}/${changeField}/${newVal}`,
       "",
@@ -104,12 +112,14 @@ export default function MapEditing() {
     );
   };
 
+  //This function asynchronously edits a node's information in the database
   const editEdgeDB = async (
     edgeID: string,
     changeField: string,
     newVal: string,
   ) => {
-    const token = await getAccessTokenSilently();
+    const token = await getAccessTokenSilently(); //Retrieve an access token asynchronously
+    //Send POST request to update the node's information
     await axios.post(
       `/api/admin/edge/edit/${edgeID}/${changeField}/${newVal}`,
       "",
@@ -127,48 +137,62 @@ export default function MapEditing() {
       className="flex h-screen overflow-hidden flex-row bg-[#d6d8d5]"
     >
       <SideBar />
-      <main className="flex content-center justify-center leading-none relative flex-grow-1">
+      <main className="flex content-center justify-center leading-none relative">
         <TransformWrapper alignmentAnimation={{ sizeX: 0, sizeY: 0 }}>
           {({ zoomIn, zoomOut, resetTransform }) => (
             <section>
               <ThemeProvider theme={appTheme}>
-                <ButtonGroup
-                  variant="contained"
-                  color="primary"
-                  className="flex absolute top-1 left-1 z-10"
-                >
-                  <Button
-                    onClick={() => zoomOut()}
-                    children={<ZoomOutIcon />}
-                    className="p-1"
-                  />
-                  <Button onClick={() => resetTransform()} children={"Reset"} />
-                  <Button
-                    onClick={() => zoomIn()}
-                    children={<ZoomInIcon />}
-                    className="p-1"
-                  />
-                  <Select
-                    value={currentMap}
-                    onChange={(event) => setCurrentMap(event.target.value)}
+                <div id="controls">
+                  <ButtonGroup variant="contained">
+                    <Button
+                      onClick={() => zoomOut()}
+                      children={<ZoomOutIcon />}
+                      className="p-1"
+                      sx={{
+                        borderTopLeftRadius: "0.75rem",
+                        borderBottomLeftRadius: "0.75rem",
+                      }}
+                    />
+                    <Button
+                      onClick={() => resetTransform()}
+                      children={"Reset"}
+                    />
+                    <Button
+                      onClick={() => zoomIn()}
+                      children={<ZoomInIcon />}
+                      className="p-1"
+                      sx={{
+                        borderTopRightRadius: "0.75rem",
+                        borderBottomRightRadius: "0.75rem",
+                      }}
+                    />
+                  </ButtonGroup>
+                  <ButtonGroup
+                    orientation="vertical"
+                    variant="contained"
                     sx={{
+                      position: "fixed",
+                      bottom: 0,
                       backgroundColor: "primary.main",
                       color: "white",
                       "&:hover": {
                         backgroundColor: "primary.dark",
                       },
-                      "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      "& .MuiButton-root": {
                         borderColor: "white",
                       },
                     }}
                   >
                     {floors.map((floor, index) => (
-                      <MenuItem key={index} value={floor.map}>
-                        {floor.name}
-                      </MenuItem>
+                      <Button
+                        key={index}
+                        onClick={() => setCurrentMap(floor.map)}
+                      >
+                        {floor.level}
+                      </Button>
                     ))}
-                  </Select>
-                </ButtonGroup>
+                  </ButtonGroup>
+                </div>
               </ThemeProvider>
               <TransformComponent>
                 <SVGCanvas
@@ -193,7 +217,7 @@ export default function MapEditing() {
           )}
         </TransformWrapper>
       </main>
-      <aside className="bg-primary text-secondary flex-shrink fixed top-0 right-0 h-full rounded-l-xl">
+      <aside className="bg-primary text-secondary flex-shrink fixed top-0 right-0 h-full">
         <Stack>
           <h1 className="text-xl bg-transparent p-2 text-center">
             Clicked Node/Edge Information:
