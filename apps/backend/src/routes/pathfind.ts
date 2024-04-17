@@ -1,7 +1,7 @@
 import express, { Router, Request, Response } from "express";
 import { Graph } from "../graph.ts";
 import { PrismaClient } from "database";
-import { findpath } from "../findpath.ts";
+import { algoType, findpath } from "../findpath.ts";
 
 const prisma = new PrismaClient();
 
@@ -35,7 +35,7 @@ router.get(
     //const path: string[] = graph.AStar(startNodeID, endNodeID);
     const path: string[] = findpath.doAlgo(
       graph,
-      "AStar",
+      algoType.AStar,
       startNodeID,
       endNodeID,
     );
@@ -87,7 +87,7 @@ router.get(
 
     const path: string[] = findpath.doAlgo(
       graph,
-      "Dijkstra",
+      algoType.Dijkstra,
       startNodeID,
       endNodeID,
     );
@@ -139,7 +139,7 @@ router.get(
 
     const path: string[] = findpath.doAlgo(
       graph,
-      "BFS",
+      algoType.BFS,
       startNodeID,
       endNodeID,
     );
@@ -191,7 +191,7 @@ router.get(
 
     const path: string[] = findpath.doAlgo(
       graph,
-      "DFS",
+      algoType.DFS,
       startNodeID,
       endNodeID,
     );
