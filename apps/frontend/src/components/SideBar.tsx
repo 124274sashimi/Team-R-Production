@@ -1,6 +1,7 @@
 // import MapIcon from '@mui/icons-material/Map';
 // import LoginIcon from '@mui/icons-material/Login';
-import { Logout } from "@mui/icons-material";
+import { SubmitUserDB } from "../backendreference/addUserToDB.ts";
+import { Logout, Login } from "@mui/icons-material";
 // import RoomServiceIcon from '@mui/icons-material/RoomService';
 // import LastPageIcon from '@mui/icons-material/LastPage';
 import FirstPageIcon from "@mui/icons-material/FirstPage";
@@ -9,10 +10,13 @@ import { ReactNode, useState, useEffect } from "react";
 import { BsBellFill } from "react-icons/bs";
 import { RiHome3Fill } from "react-icons/ri";
 import TableViewIcon from "@mui/icons-material/TableView";
-import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
+// import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import { useNavigate, useLocation } from "react-router-dom";
 import EditIcon from "@mui/icons-material/Edit";
 import { useAuth0 } from "@auth0/auth0-react";
+// import ImportContactsIcon from "@mui/icons-material/ImportContacts";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import InfoIcon from "@mui/icons-material/Info";
 // import {IconType} from "react-icons";
 // import {SvgIconComponent} from "@mui/icons-material";
 // import {Collapse} from "@mui/material";
@@ -21,7 +25,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 //     handleOpenServiceRequestModal: () => void;
 //     handleOpenNavigationScreenModal: () => void;
 // }
-import BWHLogo from "../assets/Brigham_and_Womens_Hospital_logo.svg.png";
+import BWHLogo from "../assets/brigLogo.png";
 interface Menu {
   title: string;
   icon: ReactNode;
@@ -36,6 +40,7 @@ export default function Sidebar() {
     loginWithRedirect,
     getAccessTokenSilently,
     logout,
+    user,
   } = useAuth0();
 
   const home: Menu = {
@@ -70,21 +75,72 @@ export default function Sidebar() {
     displayLoggedIn: true,
   };
   // const uploadCSV: Menu = { title: "Upload CSV", icon: <UploadFile /> };
-  const downloadCSV: Menu = {
-    title: "Upload/Download CSV",
-    icon: <CloudDownloadIcon />,
+  // const downloadCSV: Menu = {
+  //   title: "Upload/Download CSV",
+  //   icon: <CloudDownloadIcon />,
+  //   displayLoggedIn: true,
+  // };
+  const stats: Menu = {
+    title: "Stats",
+    icon: <BarChartIcon />,
     displayLoggedIn: true,
   };
-  const Menus: Menu[] = [
+
+  // const creditsPage: Menu = {
+  //   title: "Credits Page",
+  //   icon: <ImportContactsIcon />,
+  //   displayLoggedIn: false,
+  // };
+  const aboutPage: Menu = {
+    title: "About and Credits",
+    icon: <InfoIcon />,
+    displayLoggedIn: false,
+  };
+  const login: Menu = {
+    title: "Staff Login",
+    icon: <Login />,
+    displayLoggedIn: false,
+  };
+
+  // const Menus: Menu[] = [
+  //   home,
+  //   editmap,
+  //   serviceRequest,
+  //   serviceRequestTable,
+  //   nodes_edges,
+  //   // uploadCSV,
+  //   downloadCSV,
+  //   logoutOption,
+  //   login,
+  // ];
+  const [Menus, setMenus] = useState<Menu[]>([
     home,
     editmap,
     serviceRequest,
     serviceRequestTable,
     nodes_edges,
-    // uploadCSV,
-    downloadCSV,
+    // downloadCSV,
+    aboutPage,
     logoutOption,
-  ];
+    login,
+  ]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      setMenus([
+        home,
+        editmap,
+        serviceRequest,
+        serviceRequestTable,
+        nodes_edges,
+        // downloadCSV,
+        stats,
+        aboutPage,
+        logoutOption,
+      ]);
+    }
+    // eslint-disable-next-line
+  }, [isAuthenticated]);
 
   const location = useLocation();
   const currentURL = location.pathname;
@@ -95,7 +151,16 @@ export default function Sidebar() {
       // Define an asynchronous function to refresh the access token.
       const refreshToken = async () => {
         try {
-          await getAccessTokenSilently();
+          const token: string = await getAccessTokenSilently(); //If the user is logged in and we can get their user...
+          try {
+            //Try to add them to the database...
+            await SubmitUserDB(user!, token);
+          } catch (error) {
+            //If they already exist within the database...
+            console.log(
+              "could not add user to employee databse! This user likely already exists within the database",
+            );
+          }
         } catch (error) {
           // If an error occurs during token refresh, redirect the user to the login page.
           await loginWithRedirect({
@@ -118,6 +183,7 @@ export default function Sidebar() {
       location.pathname, // Pathname of the current location.
       isLoading, // Boolean indicating whether authentication is in progress.
       isAuthenticated, // Boolean indicating whether the user is authenticated.
+      user, // auth0 user
     ],
   );
 
@@ -143,12 +209,21 @@ export default function Sidebar() {
     case "/node-edge-table":
       menuHighlight = "Node/Edge Table";
       break;
-    case "/upload-download-csv":
-      menuHighlight = "Upload/Download CSV";
-      break;
+    // case "/upload-download-csv":
+    //   menuHighlight = "Upload/Download CSV";
+    //   break;
     // case "/download-csv":
     //   menuHighlight = "Download CSV";
     //   break;
+    case "/stats":
+      menuHighlight = "Stats";
+      break;
+    // case "/credits":
+    //   menuHighlight = "Credits Page";
+    //   break;
+    case "/about":
+      menuHighlight = "About and Credits";
+      break;
     case "/logout":
       menuHighlight = "Logout";
       break;
@@ -204,16 +279,27 @@ export default function Sidebar() {
     } else if (title === "Home") {
       // Redirect to the home page.
       routeChange("home");
-    } else if (title === "Upload/Download CSV") {
-      // Redirect to the upload/download CSV page.
-      routeChange("upload-download-csv");
+      // } else if (title === "Upload/Download CSV") {
+      //   // Redirect to the upload/download CSV page.
+      //   routeChange("upload-download-csv");
+    } else if (title === "Staff Login") {
+      loginWithRedirect({
+        appState: { returnTo: "/home" },
+      });
+    } else if (title === "Stats") {
+      //redirect to stats page
+      routeChange("stats");
+      // } else if (title === "Credits Page") {
+      //   routeChange("credits");
+    } else if (title === "About and Credits") {
+      routeChange("about");
     }
   };
 
   return (
     <div className="flex h-screen">
       <div
-        className={`bg-primary h-full p-5 pt-9 flex flex-col drop-shadow-2xl justify-between ${
+        className={`bg-primary h-full p-5 pt-5 flex flex-col drop-shadow-2xl justify-between ${
           open ? "w-72" : "w-20"
         } duration-300 relative`}
       >
@@ -230,7 +316,7 @@ export default function Sidebar() {
         {/*Rounded full makes the arrow be in a circle*/}
         {/*-right-4 and top-9 control the position relative to the container*/}
 
-        <div className="inline-flex">
+        <div className="inline-flex items-center">
           <img
             className="w-10 rounded cursor-pointer block float-left mr-2"
             src={BWHLogo}
