@@ -12,6 +12,13 @@ import editServiceRequestRouter from "./routes/editServiceRequestRouter.ts";
 import delServiceRequestRouter from "./routes/delServiceRequestRouter.ts";
 import editEdgeRouter from "./routes/editEdgeRouter.ts";
 import editNodeRouter from "./routes/editNodeRouter.ts";
+import delNodesRouter from "./routes/delNodesRouter.ts";
+import delEdgesRouter from "./routes/delEdgesRouter.ts";
+import addNodeRouter from "./routes/addNodeRouter.ts";
+import addEdgeRouter from "./routes/addEdgeRouter.ts";
+import resetRouter from "./routes/resetRouter.ts";
+import allEmployeesRouter from "./routes/allEmployeesRouter.ts";
+import addEmployeeRouter from "./routes/addEmployeeRouter.ts";
 import { auth } from "express-oauth2-jwt-bearer";
 
 const app: Express = express(); // Setup the backend
@@ -48,12 +55,19 @@ app.use(
 );
 
 // app.use("/api/high-score", exampleRouter);
-app.use("/api/service/create", serviceRequestRouter);
 app.use("/api/admin/csv", CSVRouter);
+app.use("/api/service/create", serviceRequestRouter);
 app.use("/api/admin/service/edit", editServiceRequestRouter);
 app.use("/api/admin/service/del", delServiceRequestRouter);
 app.use("/api/admin/edge/edit", editEdgeRouter);
 app.use("/api/admin/node/edit", editNodeRouter);
+app.use("/api/admin/node/add", addNodeRouter);
+app.use("/api/admin/edge/add", addEdgeRouter);
+app.use("/api/admin/edge/del", delEdgesRouter);
+app.use("/api/admin/node/del", delNodesRouter);
+app.use("/api/admin/reset", resetRouter);
+app.use("/api/admin/allEmployees", allEmployeesRouter);
+app.use("/api/admin/employee/add", addEmployeeRouter);
 
 /**
  * Catch all 404 errors, and forward them to the error handler

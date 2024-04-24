@@ -4,12 +4,17 @@ import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import MainPage from "./Pages/MainPage.tsx";
 import SignInPage from "./Pages/SignInPage.tsx";
 import MapEditing from "./Pages/MapEditing.tsx";
-import FullServiceRequest from "./components/FullServiceRequest.tsx";
+//import FullServiceRequest from "./components/FullServiceRequest.tsx";
 import EdgeNodePage from "./Pages/EdgeNodePage.tsx";
 import Snackbar from "@mui/material/Snackbar";
+import CreditsPage from "./Pages/CreditsPage.tsx";
 import { Alert } from "@mui/material";
 import { ServiceRequest } from "./Interfaces/ServiceRequest.ts";
 import ServiceRequestTable from "./Pages/ServiceRequestTable.tsx";
+
+//Artem Page import
+import St4t5Page from "./Pages/StatsPage.tsx";
+import AboutPage from "./Pages/AboutPage.tsx";
 // import DownloadCSV from "./backendreference/DownloadCSV.tsx";
 // import UploadCSV from "./Pages/UploadCSV.tsx";
 import UploadDownloadCSV from "./Pages/UploadDownloadPage.tsx";
@@ -17,7 +22,8 @@ import { Auth0Provider } from "@auth0/auth0-react";
 // import {useAuth0} from "@auth0/auth0-react";
 //this is for the login and logout pages using auth0, too tired to figure out how to call them, prob super ez idk
 import { useNavigate } from "react-router-dom";
-
+import { ServiceRequestMenu } from "./Pages/ServiceRequestMenu.tsx";
+//definition of context for service requests
 type appContextType = {
   requests: ServiceRequest[];
   setRequests: (state: ServiceRequest[]) => void;
@@ -29,21 +35,26 @@ export const RequestContext = createContext<appContextType>({
 });
 
 function App() {
+  //actual list of options for service reqs
+  //TODO: Add 6th option for iteration 4
   const guestOptions: string[] = [
     "Flowers",
     "Gifts",
+    "Entertainment",
     "Medicine",
     "Maintenance",
     "Medical Equipment",
-  ]; //options for service requests
+  ];
   const [snackbar, setSnackbar] = React.useState({
     severity: "success",
     open: false,
     message: "",
   });
+  //state to manage Snackbar messages, sparsely implemented
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
-
+  //state to manage service requests
   const router = createBrowserRouter([
+    //router config
     {
       path: "/",
       errorElement: <div />,
@@ -63,11 +74,11 @@ function App() {
         },
         {
           path: "servicerequest",
-          element: <FullServiceRequest availableServices={guestOptions} />,
+          element: <ServiceRequestMenu />,
         },
         {
           path: "service-request-table",
-          element: <ServiceRequestTable />,
+          element: <ServiceRequestTable availableServices={guestOptions} />,
         },
         {
           path: "node-edge-table",
@@ -80,6 +91,18 @@ function App() {
         {
           path: "upload-download-csv",
           element: <UploadDownloadCSV />,
+        },
+        {
+          path: "stats",
+          element: <St4t5Page />,
+        },
+        {
+          path: "credits",
+          element: <CreditsPage />,
+        },
+        {
+          path: "about",
+          element: <AboutPage />,
         },
       ],
     },
@@ -96,7 +119,7 @@ function App() {
     //   },
     // });
     // baby's first await logic break
-
+    //Root component to handle Auth0 authentication and give context
     return (
       <Auth0Provider
         useRefreshTokens

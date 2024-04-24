@@ -41,6 +41,8 @@ export class findpath {
     } else {
       this.Algorithm = new AStar();
     }
-    return this.Algorithm.pathfind(graph, start, end);
+    const path = this.Algorithm.pathfind(graph, start, end);
+
+    return path;
   }
 }
