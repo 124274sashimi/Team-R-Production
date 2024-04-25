@@ -28,7 +28,10 @@ export default function SVGCanvas(props: {
   nodeClicked?: Nodes | undefined; //The currently clicked node
   handleNodeClicked?: (node: Nodes | undefined) => void; //Function to handle node clicks
   edgeClicked?: Edges | undefined; //The currently clicked edge
-  handleEdgeClicked?: (edge: Edges | undefined) => void; //Function to handle edge clicks
+  handleEdgeClicked?: (
+    edge: Edges | undefined,
+    isMouseClicked: boolean,
+  ) => void; //Function to handle edge clicks
   handleNodeHover?: (node: Nodes | undefined) => void; //Function to handle node hover events
   isHome: boolean; //Indicates whether the canvas is being used in the home page
   showPathOnly: boolean; //Indicates whether to show only the path or the entire map
@@ -123,7 +126,7 @@ export default function SVGCanvas(props: {
     }
     // If handleEdgeClicked callback is provided, reset the edge clicked state by invoking it with undefined
     if (props.handleEdgeClicked) {
-      props.handleEdgeClicked(undefined);
+      props.handleEdgeClicked(undefined, false);
     }
   }
 
@@ -290,7 +293,7 @@ export default function SVGCanvas(props: {
 
   function handleEdgeClick(edge: Edges) {
     if (props.handleEdgeClicked) {
-      props.handleEdgeClicked(edge);
+      props.handleEdgeClicked(edge, true);
     }
     if (props.handleNodeClicked) {
       props.handleNodeClicked(undefined);
@@ -493,29 +496,45 @@ export default function SVGCanvas(props: {
         splices()[0][0] && // Ensure the splices array is not empty
         splices().map((splice, index) => {
           if (splice.every((node) => node.Floor === currentFloor)) {
-            // const totalLength = splice.length;
+            const totalLength = splice.length;
             return splice.map((node, i) => {
               const nextNode = splice[i + 1];
               if (nextNode) {
                 return (
-                  <motion.path
-                    key={`${index}`}
-                    d={`M ${splice[0].Xcoord},${splice[0].Ycoord} ${splice
-                      .slice(1)
-                      .map((node) => `L ${node.Xcoord},${node.Ycoord}`)
-                      .join(" ")}`}
-                    stroke={props.edgeColor ?? "blue"}
-                    strokeWidth="5"
-                    fill="none"
-                    // initial={{ pathLength: 0 }}
-                    // animate={{ pathLength: 2 }}
-                    // transition={{
-                    //   duration: 0.5 * totalLength,
-                    //   ease: "linear",
-                    //   repeat: Infinity,
-                    //   repeatDelay: 0.01,
-                    // }}
-                  />
+                  <>
+                    <path
+                      d={`M ${splice[0].Xcoord},${splice[0].Ycoord} ${splice
+                        .slice(1)
+                        .map((node) => `L ${node.Xcoord},${node.Ycoord}`)
+                        .join(" ")}`}
+                      stroke="#012d5a"
+                      strokeWidth="13"
+                      fill="none"
+                    />
+
+                    <motion.path
+                      key={`${index}`}
+                      d={`M ${splice[0].Xcoord},${splice[0].Ycoord} ${splice
+                        .slice(1)
+                        .map((node) => `L ${node.Xcoord},${node.Ycoord}`)
+                        .join(" ")}`}
+                      stroke="#009CA6"
+                      strokeWidth="4"
+                      fill="none"
+                      initial={{
+                        pathLength: 0,
+                        strokeDasharray: "100 50",
+                        strokeDashoffset: "100",
+                      }}
+                      animate={{ pathLength: 2, strokeDashoffset: 0 }}
+                      transition={{
+                        duration: 0.5 * totalLength,
+                        ease: "linear",
+                        repeat: Infinity,
+                        repeatDelay: 0.01,
+                      }}
+                    />
+                  </>
                 );
               }
               return null; // Return null if the conditions are not met (no line to render)
@@ -536,7 +555,11 @@ export default function SVGCanvas(props: {
         )[0];
         return (
           //Create line that follow edges
-          <g onClick={() => handleEdgeClick(edge)}>
+          <g
+            onClick={() => {
+              handleEdgeClick(edge);
+            }}
+          >
             <line
               x1={startNode.Xcoord}
               y1={startNode.Ycoord}
