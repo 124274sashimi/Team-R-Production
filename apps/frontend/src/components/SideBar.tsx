@@ -6,7 +6,7 @@ import { Logout, Login } from "@mui/icons-material";
 // import LastPageIcon from '@mui/icons-material/LastPage';
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import AccessibleForwardIcon from "@mui/icons-material/AccessibleForward";
-import { ReactNode, useState, useEffect } from "react";
+import React, { ReactNode, useState, useEffect } from "react";
 import { BsBellFill } from "react-icons/bs";
 import { RiHome3Fill } from "react-icons/ri";
 import TableViewIcon from "@mui/icons-material/TableView";
@@ -17,6 +17,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 // import ImportContactsIcon from "@mui/icons-material/ImportContacts";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import InfoIcon from "@mui/icons-material/Info";
+import LanguageIcon from "@mui/icons-material/Language";
 // import {IconType} from "react-icons";
 // import {SvgIconComponent} from "@mui/icons-material";
 // import {Collapse} from "@mui/material";
@@ -26,6 +27,8 @@ import InfoIcon from "@mui/icons-material/Info";
 //     handleOpenNavigationScreenModal: () => void;
 // }
 import BWHLogo from "../assets/brigLogo.png";
+import { Box, Button, IconButton, Popover } from "@mui/material";
+import { useTranslation } from "react-i18next";
 interface Menu {
   title: string;
   icon: ReactNode;
@@ -42,6 +45,26 @@ export default function Sidebar() {
     logout,
     user,
   } = useAuth0();
+  const { t, i18n, ready } = useTranslation();
+  const [anchorEl, setAnchorEl] = React.useState<
+    (EventTarget & Element) | null
+  >(null);
+
+  const handleClick = (event: React.MouseEvent) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const languageOpen = Boolean(anchorEl);
+  const id = languageOpen ? "language-popover" : undefined;
+
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+    handleClose();
+  };
 
   const home: Menu = {
     title: "Home",
@@ -234,7 +257,7 @@ export default function Sidebar() {
   const [open, setOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState<string>(menuHighlight);
 
-  const collapse = { title: "Collapse", icon: <FirstPageIcon /> };
+  // const collapse = { title: "Collapse", icon: <FirstPageIcon /> };
 
   const navigate = useNavigate();
 
@@ -371,6 +394,45 @@ export default function Sidebar() {
         <div className="flex-grow"></div>
 
         <div className="pb-2">
+          {ready && (
+            <Box sx={{ width: "100%" }}>
+              <IconButton
+                sx={{ color: "white" }}
+                onClick={(event: React.MouseEvent) => handleClick(event)}
+              >
+                <LanguageIcon />
+              </IconButton>
+              <Popover
+                id={id}
+                open={languageOpen}
+                anchorEl={anchorEl}
+                onClose={handleClose}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "right",
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+              >
+                <Box display="flex" flexDirection="column" minWidth={80}>
+                  <Button
+                    style={{ textTransform: "none" }}
+                    onClick={() => changeLanguage("en")}
+                  >
+                    English
+                  </Button>
+                  <Button
+                    style={{ textTransform: "none" }}
+                    onClick={() => changeLanguage("zh")}
+                  >
+                    Chinese
+                  </Button>
+                </Box>
+              </Popover>
+            </Box>
+          )}
           <li
             className="text-white text-2xl flex items-center gap-x-8 cursor-pointer p-2 hover:bg-blue-300 hover:bg-secondary/25 hover:border-r-4 rounded-md mt-2"
             onClick={() => setOpen(!open)}
@@ -383,7 +445,7 @@ export default function Sidebar() {
             <span
               className={`text-base font-medium flex-1 duration-300 ${!open && "scale-0"}`}
             >
-              {collapse.title}
+              {t("collapse")}
             </span>
           </li>
         </div>
