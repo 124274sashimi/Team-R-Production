@@ -34,6 +34,7 @@ import {
 } from "../components/mapElements.ts";
 import { rightSideBarStyle } from "../styles/RightSideBarStyle.ts";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { t } from "i18next";
 
 export default function MainPage() {
   //Use auth0 react hook
@@ -258,7 +259,7 @@ export default function MainPage() {
 
               <aside className={rightSideBarStyle}>
                 <h1 className="text-xl bg-transparent text-center">
-                  Enter your start and end locations:
+                  {t("Enter your start and end locations:")}
                 </h1>
                 <Autocomplete
                   value={start}
@@ -273,7 +274,7 @@ export default function MainPage() {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Start Location"
+                      label={t("Start Location")}
                       sx={autocompleteStyle}
                     />
                   )}
@@ -291,7 +292,7 @@ export default function MainPage() {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="End Location"
+                      label={t("End Location")}
                       sx={autocompleteStyle}
                     />
                   )}
@@ -314,7 +315,7 @@ export default function MainPage() {
                       resetTransform();
                     }}
                   >
-                    Get Directions
+                    {t("Get Directions")}
                   </Button>
                   <Button
                     className="content-center "
@@ -334,7 +335,7 @@ export default function MainPage() {
                     }}
                     style={{ marginLeft: "auto" }}
                   >
-                    Reset Map
+                    {t("Reset Map")}
                   </Button>
                 </div>
                 {/*Selecting pathfind algorithm*/}

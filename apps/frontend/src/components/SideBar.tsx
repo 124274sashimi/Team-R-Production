@@ -67,33 +67,33 @@ export default function Sidebar() {
   };
 
   const home: Menu = {
-    title: "Home",
+    title: t("Home"),
     icon: <RiHome3Fill />,
     displayLoggedIn: false,
   };
   const serviceRequest: Menu = {
-    title: "Service Request",
+    title: t("Service Request"),
     icon: <BsBellFill />,
     displayLoggedIn: true,
   };
   const serviceRequestTable: Menu = {
-    title: "Service Request Table",
+    title: t("Service Request Table"),
     icon: <TableViewIcon />,
     displayLoggedIn: true,
   };
   const editmap: Menu = {
-    title: "Edit Map",
+    title: t("Edit Map"),
     icon: <EditIcon />,
     displayLoggedIn: true,
   };
 
   const logoutOption: Menu = {
-    title: "Logout",
+    title: t("Logout"),
     icon: <Logout />,
     displayLoggedIn: false,
   };
   const nodes_edges: Menu = {
-    title: "CSV Data",
+    title: t("CSV Data"),
     icon: <AccessibleForwardIcon />,
     displayLoggedIn: true,
   };
@@ -104,7 +104,7 @@ export default function Sidebar() {
   //   displayLoggedIn: true,
   // };
   const stats: Menu = {
-    title: "Stats",
+    title: t("Stats"),
     icon: <BarChartIcon />,
     displayLoggedIn: true,
   };
@@ -115,12 +115,12 @@ export default function Sidebar() {
   //   displayLoggedIn: false,
   // };
   const aboutPage: Menu = {
-    title: "About and Credits",
+    title: t("About and Credits"),
     icon: <InfoIcon />,
     displayLoggedIn: false,
   };
   const login: Menu = {
-    title: "Staff Login",
+    title: t("Staff Login"),
     icon: <Login />,
     displayLoggedIn: false,
   };
@@ -213,7 +213,7 @@ export default function Sidebar() {
 
   switch (currentURL) {
     case "/servicerequest":
-      menuHighlight = "Service Request";
+      menuHighlight = t("Service Request");
       break;
     case "/":
       menuHighlight = "Login";
@@ -349,7 +349,7 @@ export default function Sidebar() {
               !open && "scale-0"
             }`}
           >
-            Welcome
+            {t("Welcome")}
           </h1>
         </div>
 
@@ -364,7 +364,7 @@ export default function Sidebar() {
             <li
               key={index}
               className={`text-white text-2xl flex items-center gap-x-5 cursor-pointer p-2 rounded-md mt-2 hover:border-r-4 hover:border-secondary${
-                activeMenu === menu.title
+                activeMenu === t(menu.title)
                   ? "border-r-4 border-tertiary bg-tertiary/25"
                   : "hover:bg-blue-300 hover:bg-secondary/25"
               }`}
@@ -373,17 +373,19 @@ export default function Sidebar() {
             >
               <span
                 className={`${
-                  activeMenu === menu.title ? "text-tertiary" : "text-secondary"
+                  activeMenu === t(menu.title)
+                    ? "text-tertiary"
+                    : "text-secondary"
                 }`}
               >
                 {menu.icon}
               </span>
               <span
                 className={`text-base font-medium flex-1 duration-300 ${!open && "scale-0"} ${
-                  activeMenu === menu.title ? "text-tertiary" : "text-white"
+                  activeMenu === t(menu.title) ? "text-tertiary" : "text-white"
                 }`}
               >
-                {menu.title}
+                {t(menu.title)}
               </span>
             </li>
           ))}

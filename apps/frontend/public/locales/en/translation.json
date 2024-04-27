@@ -1,4 +1,26 @@
 {
   "welcome": "Welcome",
-  "collapse": "Collapse"
+  "Brigham And Women's Hospital": "Brigham And Women's Hospital",
+  "logout": "Logout",
+  "Helping our patients and their families get back to what matters most.": "Helping our patients and their families get back to what matters most.",
+  "view map": "View Map",
+  "Staff? Sign in Here": "Staff? Sign in Here",
+  "This website is a term project exercise for WPI CS 3733 Software Engineering (Prof. Wong) and is not to be confused with the actual Brigham & Women’s Hospital website.": "This website is a term project exercise for WPI CS 3733 Software Engineering (Prof. Wong) and is not to be confused with the actual Brigham & Women’s Hospital website.",
+  "collapse": "Collapse",
+  "Home": "Home",
+  "Service Request": "Service Request",
+  "Service Request Table": "Service Request Table",
+  "Welcome": "Welcome",
+  "Edit Map": "Edit Map",
+  "Logout": "Logout",
+  "CSV Data": "CSV Data",
+  "Stats": "Stats",
+  "About and Credits": "About and Credits",
+  "Staff Login": "Staff Login",
+  "Enter your start and end locations:": "Enter your start and end locations:",
+  "Start Location": "Start Location",
+  "End Location": "End Location",
+  "Get Directions": "Get Directions",
+  "Reset Map": "Reset Map",
+  "Reset": "Reset"
 }

@@ -4,6 +4,7 @@ import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import { buttonStyle } from "../styles/muiStyles";
 import { floors } from "./mapElements.ts";
 import { Nodes } from "database";
+import { t } from "i18next";
 
 export function MapControls(props: {
   zoomOut: () => void;
@@ -28,7 +29,7 @@ export function MapControls(props: {
         />
         <Button
           onClick={() => props.resetTransform()}
-          children={"Reset"}
+          children={t("Reset")}
           sx={{
             padding: "20px",
             fontSize: "15px",

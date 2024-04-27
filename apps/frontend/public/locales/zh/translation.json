@@ -1,4 +1,26 @@
 {
   "welcome": "欢迎",
-  "collapse": "折叠"
+  "Brigham And Women's Hospital": "伯明翰妇女医院",
+  "logout": "登出",
+  "Helping our patients and their families get back to what matters most.": "济世救人、仁爱为怀",
+  "View Map": "查看地图",
+  "Staff ? Sign in Here": "员工登陆",
+  "This website is a term project exercise for WPI CS 3733 Software Engineering (Prof. Wong) and is not to be confused with the actual Brigham & Women’s Hospital website.": "本网站是 WPI CS3733 软件工程（Prof Wong）的学期项目练习，并不是实际的伯明翰妇女医院网站。",
+  "collapse": "折叠",
+  "Home": "首页",
+  "Service Request": "服务请求",
+  "Service Request Table": "服务请求表",
+  "Welcome": "欢迎",
+  "Edit Map": "地图编辑",
+  "Logout": "登出",
+  "CSV Data": "CSV 数据",
+  "Stats": "统计图",
+  "About and Credits": "关于和鸣谢",
+  "Staff Login": "员工登陆",
+  "Enter your start and end locations:": "输入您的起点和终点：",
+  "Start Location": "起点",
+  "End Location": "终点",
+  "Get Directions": "导航",
+  "Reset Map": "清除",
+  "Reset": "重置"
 }

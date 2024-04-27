@@ -68,9 +68,9 @@ function SignInPage() {
             {" "}
             {/* Container for h1 and icon */}
             <h1 className="text-white text-2xl">
-              This website is a term project exercise for WPI CS 3733 Software
-              Engineering (Prof. Wong) and is not to be confused with the actual
-              Brigham & Women’s Hospital website.
+              {t(
+                "This website is a term project exercise for WPI CS 3733 Software Engineering (Prof. Wong) and is not to be confused with the actual Brigham & Women’s Hospital website.",
+              )}
             </h1>
             <HighlightOffOutlinedIcon
               sx={{ color: "white", fontSize: "3rem", marginLeft: "1rem" }}
@@ -117,13 +117,13 @@ function SignInPage() {
                   style={{ textTransform: "none" }}
                   onClick={() => changeLanguage("en")}
                 >
-                  English
+                  {t("English")}
                 </Button>
                 <Button
                   style={{ textTransform: "none" }}
                   onClick={() => changeLanguage("zh")}
                 >
-                  Chinese
+                  {t("Chinese")}
                 </Button>
               </Box>
             </Popover>
@@ -136,10 +136,13 @@ function SignInPage() {
                         justify-center justify-self-center"
         >
           <h1 className="text-6xl font-bold">{t("welcome")}</h1>
-          <h2 className="text-4xl font-bold">Brigham And Women's Hospital</h2>
+          <h2 className="text-4xl font-bold">
+            {t("Brigham And Women's Hospital")}
+          </h2>
           <p className="text-3xl">
-            Helping our patients and their families get back to what matters
-            most.
+            {t(
+              "Helping our patients and their families get back to what matters most.",
+            )}
           </p>
         </div>
 
@@ -159,7 +162,7 @@ function SignInPage() {
             src={ViewMap}
             alt="ViewMap"
           />
-          <p className="p-3 w-full">View Map</p>
+          <p className="p-3 w-full">{t("View Map")}</p>
         </UserTypeButton>
 
         <UserTypeButton
@@ -175,7 +178,7 @@ function SignInPage() {
                         bg-primary
                         font-semibold"
         >
-          Staff? Sign in Here
+          {t("Staff ? Sign in Here")}
         </UserTypeButton>
       </aside>
     </main>
