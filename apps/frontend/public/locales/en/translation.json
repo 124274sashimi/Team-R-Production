@@ -22,5 +22,14 @@
   "End Location": "End Location",
   "Get Directions": "Get Directions",
   "Reset Map": "Reset Map",
-  "Reset": "Reset"
+  "right at": "Right",
+  "Flowers": "Flowers",
+  "Select Bouquet": "Select Bouquet",
+  "Reset": "Reset",
+  "straight": "straight at {{address}}",
+  "left": "left at {{address}}",
+  "right": "right at {{address}}",
+  "elevator": "elevator at {{address}}",
+  "arrived": "arrived at {{address}}",
+  "From To": "{{end}} from {{start}}"
 }

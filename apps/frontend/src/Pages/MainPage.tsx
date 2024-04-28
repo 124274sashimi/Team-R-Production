@@ -34,8 +34,7 @@ import {
 } from "../components/mapElements.ts";
 import { rightSideBarStyle } from "../styles/RightSideBarStyle.ts";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { t } from "i18next";
-
+import { useTranslation } from "react-i18next";
 export default function MainPage() {
   //Use auth0 react hook
   const { getAccessTokenSilently } = useAuth0();
@@ -61,7 +60,7 @@ export default function MainPage() {
   //   const newPath = `/${path}`;
   //   navigate(newPath);
   // };
-
+  const { t } = useTranslation();
   useEffect(() => {
     //async function to fetch data from the server
     async function fetchData() {
@@ -152,12 +151,15 @@ export default function MainPage() {
   }
 
   const pathToText = (direction: string) => {
+    const directionArr = direction.split("at");
+    const directionAddress =
+      directionArr.length > 0 ? directionArr[1].trim() : "";
     // straight
     if (direction.includes("straight")) {
       return (
         <Box mb={2} display="flex" gap={1} alignItems="center">
           <StraightIcon />
-          {direction}
+          {t("straight", { address: directionAddress })}
         </Box>
       );
     }
@@ -167,7 +169,7 @@ export default function MainPage() {
       return (
         <Box mb={2} display="flex" gap={1} alignItems="center">
           <TurnLeftIcon />
-          {direction}
+          {t("left", { address: directionAddress })}
         </Box>
       );
     }
@@ -177,7 +179,7 @@ export default function MainPage() {
       return (
         <Box mb={2} display="flex" gap={1} alignItems="center">
           <TurnRightIcon />
-          {direction}
+          {t("right", { address: directionAddress })}
         </Box>
       );
     }
@@ -186,7 +188,7 @@ export default function MainPage() {
       return (
         <Box mb={2} display="flex" gap={1} alignItems="center">
           <ElevatorIcon />
-          {direction}
+          {t("elevator", { address: directionAddress })}
         </Box>
       );
     }
@@ -195,7 +197,7 @@ export default function MainPage() {
       return (
         <Box mb={2} display="flex" gap={1} alignItems="center">
           <MyLocationIcon />
-          {direction}
+          {t("arrived", { address: directionAddress })}
         </Box>
       );
     }
@@ -211,6 +213,7 @@ export default function MainPage() {
     return floorMap;
   }, [path]);
   console.log(groupPath);
+  console.log(pathDirections);
 
   return (
     <div
@@ -365,7 +368,7 @@ export default function MainPage() {
                   <Box maxWidth={330} className="overflow-y-scroll">
                     <Box mb={2} display="flex" gap={1} alignItems="center">
                       <SyncIcon />
-                      {end} from {start}
+                      {t("From To", { start, end })}
                     </Box>
                     {pathDirections.map((floorDirections, index) => (
                       <Accordion

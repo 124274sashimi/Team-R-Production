@@ -42,6 +42,7 @@ import { Pagination, Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import { useTranslation } from "react-i18next";
 
 // import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 // import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -109,6 +110,7 @@ function ServiceRequestLog(props: { typeOfService: string }) {
       return 0;
     }
   });
+  const { t } = useTranslation();
 
   useEffect(() => {
     async function fetchData() {
@@ -163,7 +165,7 @@ function ServiceRequestLog(props: { typeOfService: string }) {
         contentComponent = (
           <>
             <div className="">
-              <h2 className="text-lg">Select Bouquet</h2>
+              <h2 className="text-lg">{t("Select Bouquet")}</h2>
               <div className="flex justify-center items-center w-full">
                 <Swiper
                   style={{ width: "80%" }}

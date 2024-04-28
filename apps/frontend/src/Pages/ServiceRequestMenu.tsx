@@ -11,6 +11,7 @@ import VaccinesIcon from "@mui/icons-material/Vaccines";
 import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
 import CasinoIcon from "@mui/icons-material/Casino";
 import swoosh from "../assets/swoosh.png";
+import { useTranslation } from "react-i18next";
 
 export function ServiceRequestMenu() {
   // Use the Auth0 React hook to handle authentication.
@@ -42,6 +43,8 @@ export function ServiceRequestMenu() {
     setTypeOfService(serviceType);
     setOpen(true);
   };
+
+  const { t } = useTranslation();
 
   return (
     <Box display="flex" className="max-w-screen h-screen">
@@ -85,7 +88,7 @@ export function ServiceRequestMenu() {
                       fontSize: "1.2rem",
                     }}
                   >
-                    Flowers
+                    {t("Flowers")}
                   </span>
                 </Box>
               </Button>

@@ -22,5 +22,14 @@
   "End Location": "终点",
   "Get Directions": "导航",
   "Reset Map": "清除",
-  "Reset": "重置"
+  "right at": "右转至",
+  "Flowers": "花卉",
+  "Select Bouquet": "选择花束",
+  "Reset": "重置",
+  "straight": "在 {{address}} 处直行",
+  "left": "在 {{address}} 处左转",
+  "right": "在 {{address}} 处右转",
+  "elevator": "在 {{address}} 处乘坐电梯",
+  "arrived": "在 {{address}} 处到达",
+  "From To": "从 {{start}} 到 {{end}}"
 }
