@@ -12,7 +12,7 @@ import { RiHome3Fill } from "react-icons/ri";
 import TableViewIcon from "@mui/icons-material/TableView";
 // import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import { useNavigate, useLocation } from "react-router-dom";
-import EditIcon from "@mui/icons-material/Edit";
+// import EditIcon from "@mui/icons-material/Edit";
 import { useAuth0 } from "@auth0/auth0-react";
 // import ImportContactsIcon from "@mui/icons-material/ImportContacts";
 import BarChartIcon from "@mui/icons-material/BarChart";
@@ -81,11 +81,11 @@ export default function Sidebar() {
     icon: <TableViewIcon />,
     displayLoggedIn: true,
   };
-  const editmap: Menu = {
-    title: t("Edit Map"),
+  /*const editmap: Menu = {
+    title: "Edit Map",
     icon: <EditIcon />,
     displayLoggedIn: true,
-  };
+  };*/
 
   const logoutOption: Menu = {
     title: t("Logout"),
@@ -138,7 +138,7 @@ export default function Sidebar() {
   // ];
   const [Menus, setMenus] = useState<Menu[]>([
     home,
-    editmap,
+    //editmap,
     serviceRequest,
     serviceRequestTable,
     nodes_edges,
@@ -151,7 +151,6 @@ export default function Sidebar() {
     if (isAuthenticated) {
       setMenus([
         home,
-        editmap,
         serviceRequest,
         serviceRequestTable,
         nodes_edges,
@@ -221,9 +220,9 @@ export default function Sidebar() {
     case "/home":
       menuHighlight = "Home";
       break;
-    case "/editmap":
+    /*case "/editmap":
       menuHighlight = "Edit Map";
-      break;
+      break;*/
     case "/service-request-table":
       menuHighlight = "Service Request Table";
       break;
@@ -291,9 +290,9 @@ export default function Sidebar() {
     } else if (title === "Service Request Table") {
       // Redirect to the service request table page.
       routeChange("service-request-table");
-    } else if (title === "Edit Map") {
+      /*} else if (title === "Edit Map") {
       // Redirect to the edit map page.
-      routeChange("editmap");
+      routeChange("editmap"); */
     } else if (title === "CSV Data") {
       // Redirect to the node/edge table page.
       routeChange("node-edge-table");
