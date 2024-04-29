@@ -31,11 +31,12 @@ import SyncIcon from "@mui/icons-material/Sync";
 import {
   floors,
   pathfindingAlgorithms,
-  defaultFloor,
+  defaultMap,
 } from "../components/mapElements.ts";
 import { rightSideBarStyle } from "../styles/RightSideBarStyle.ts";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { GetColorblindColors } from "../components/colorblind.ts";
+import { useTranslation } from "react-i18next";
 
 export default function MainPage() {
   //Use auth0 react hook
@@ -45,7 +46,7 @@ export default function MainPage() {
   const [end, setEnd] = useState("");
   const [nodes, setNodes] = useState<Nodes[]>();
   const [path, setPath] = useState<Nodes[]>([]);
-  const [currentFloor, setCurrentFloor] = useState(defaultFloor);
+  const [currentMap, setCurrentMap] = useState(defaultMap);
   const [clickTimes, setClickTimes] = useState<number>(0);
   const [pathfindingAlgorithm, setPathfindingAlgorithm] = useState(
     "/api/map/pathfind/a-star",
@@ -62,6 +63,7 @@ export default function MainPage() {
   //   const newPath = `/${path}`;
   //   navigate(newPath);
   // };
+  const { t } = useTranslation();
 
   useEffect(() => {
     //async function to fetch data from the server
@@ -123,8 +125,9 @@ export default function MainPage() {
       const startingFloor: string = startNodeArray[0].Floor;
 
       // Setting current map based on the starting floor
-      setCurrentFloor(
-        floors.find((floor) => floor.level === startingFloor) || defaultFloor,
+      setCurrentMap(
+        floors.find((floor) => floor.level === startingFloor)?.map ||
+          defaultMap,
       );
 
       // Extracting end node ID
@@ -160,10 +163,14 @@ export default function MainPage() {
   ];
 
   const pathToText = (direction: string) => {
+    const directionArr = direction.split("at");
+    const directionName = directionArr.length > 0 ? directionArr[0].trim() : "";
+    const directionAddress =
+      directionArr.length > 0 ? directionArr[1].trim() : "";
     return (
       <Box mb={2} display="flex" gap={1} alignItems="center">
         {directionsList.find((item) => direction.includes(item.dir))?.icon}
-        {direction}
+        {t(directionName, { address: directionAddress })}
       </Box>
     );
   };
@@ -191,10 +198,15 @@ export default function MainPage() {
             <section id="map">
               <TransformComponent>
                 <SVGCanvas
+                  key={currentMap}
                   path={path}
-                  currentFloor={currentFloor}
-                  setCurrentFloor={setCurrentFloor}
+                  currentMap={currentMap}
+                  setCurrentMap={setCurrentMap}
                   resetMapTransform={resetTransform}
+                  currentLevel={
+                    floors.find((floor) => floor.map === currentMap)?.level ||
+                    ""
+                  }
                   handleNodeClicked={(node) => {
                     const newClickTimes = clickTimes + 1;
                     setClickTimes(newClickTimes);
@@ -216,7 +228,7 @@ export default function MainPage() {
                   zoomOut={zoomOut}
                 ></MapControls>
                 <FloorSelect
-                  setFloor={setCurrentFloor}
+                  setMap={setCurrentMap}
                   isDirectionsClicked={isDirectionsClicked}
                   path={path}
                   resetMapTransform={resetTransform}
@@ -225,7 +237,7 @@ export default function MainPage() {
 
               <aside className={rightSideBarStyle}>
                 <h1 className="text-xl bg-transparent text-center">
-                  Enter your start and end locations:
+                  {t("Enter your start and end locations:")}
                 </h1>
                 <Autocomplete
                   value={start}
@@ -240,7 +252,7 @@ export default function MainPage() {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Start Location"
+                      label={t("Start Location")}
                       sx={autocompleteStyle}
                     />
                   )}
@@ -258,7 +270,7 @@ export default function MainPage() {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="End Location"
+                      label={t("End Location")}
                       sx={autocompleteStyle}
                     />
                   )}
@@ -281,10 +293,10 @@ export default function MainPage() {
                       resetTransform();
                     }}
                   >
-                    Get Directions
+                    {t("Get Directions")}
                   </Button>
                   <Button
-                    className="content-center"
+                    className="content-center "
                     variant="outlined"
                     sx={{
                       color: "white",
@@ -299,8 +311,9 @@ export default function MainPage() {
                       setIsDirectionsClicked(false);
                       resetTransform();
                     }}
+                    style={{ marginLeft: "auto" }}
                   >
-                    Reset Map
+                    {t("Reset Map")}
                   </Button>
                 </div>
                 {/*Selecting pathfind algorithm*/}
@@ -326,7 +339,7 @@ export default function MainPage() {
                   <Box maxWidth={330} className="overflow-y-scroll">
                     <Box mb={2} display="flex" gap={1} alignItems="center">
                       <SyncIcon />
-                      {end} from {start}
+                      {t("From To", { start, end })}
                     </Box>
                     {pathDirections.map((floorDirections, index) => (
                       <Accordion
@@ -340,7 +353,7 @@ export default function MainPage() {
                             isExpanded ? `panel${index}` : null,
                           );
                           resetTransform();
-                          setCurrentFloor(matchedFloor || defaultFloor);
+                          setCurrentMap(matchedFloor ? matchedFloor.map : "");
                         }}
                       >
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>

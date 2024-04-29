@@ -5,6 +5,7 @@ import { buttonStyle } from "../styles/muiStyles";
 import { floors } from "./mapElements.ts";
 import { Nodes } from "database";
 import { GetColorblindColors } from "./colorblind.ts";
+import { useTranslation } from "react-i18next";
 
 export function MapControls(props: {
   zoomOut: () => void;
@@ -12,6 +13,8 @@ export function MapControls(props: {
   zoomIn: () => void;
   children?: React.ReactNode;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div id="zoom-and-algorithm" className="absolute top-1 left-1 flex gap-1">
       <ButtonGroup variant="contained">
@@ -29,7 +32,7 @@ export function MapControls(props: {
         />
         <Button
           onClick={() => props.resetTransform()}
-          children={"Reset"}
+          children={t("Reset")}
           sx={{
             padding: "20px",
             fontSize: "15px",
@@ -58,17 +61,13 @@ export function MapControls(props: {
 }
 
 export function FloorSelect(props: {
-  setFloor: (newFloor: { name: string; map: string; level: string }) => void;
+  setMap: (newMap: string) => void;
   isDirectionsClicked: boolean;
   path: Nodes[];
   resetMapTransform: () => void;
 }) {
-  const handleFloorChange = (newFloor: {
-    name: string;
-    map: string;
-    level: string;
-  }) => {
-    props.setFloor(newFloor);
+  const handleFloorChange = (newMap: string) => {
+    props.setMap(newMap);
     props.resetMapTransform();
   };
   return (
@@ -87,7 +86,7 @@ export function FloorSelect(props: {
       {floors.map((floor, index) => (
         <Button
           key={index}
-          onClick={() => handleFloorChange(floor)}
+          onClick={() => handleFloorChange(floor.map)}
           sx={
             props.isDirectionsClicked &&
             props.path.some((node) => node.Floor === floor.level)

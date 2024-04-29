@@ -11,7 +11,7 @@ import { CreateNodeDB } from "../backendreference/CreateNode.tsx";
 import { CreateEdgeDB } from "../backendreference/CreateEdge.tsx";
 import { EdgesCustomHook } from "../components/SVGCanvas.tsx";
 import { FloorSelect, MapControls } from "../components/MapUtils.tsx";
-import { defaultFloor } from "../components/mapElements.ts";
+import { defaultMap, floors } from "../components/mapElements.ts";
 
 //import Table Items
 import Table from "@mui/material/Table";
@@ -69,7 +69,7 @@ export default function MapEditing() {
 
   const [nodesData, setNodesData] = useState<Nodes[]>([]);
   const { edgesData, setEdgesData } = EdgesCustomHook();
-  const [currentFloor, setCurrentFloor] = useState(defaultFloor);
+  const [currentMap, setCurrentMap] = useState(defaultMap);
   const [nodeClicked, setNodeClicked] = useState<Nodes>();
   const [edgeClicked, setEdgeClicked] = useState<Edges>();
   const [editableEdge, setEditableEdge] = useState<Edges | undefined>();
@@ -188,7 +188,7 @@ export default function MapEditing() {
 
     //Add a new node to databsae!
     const newNode = defaultNode;
-    newNode.Floor = currentFloor.level;
+    newNode.Floor = floors.find((floor) => floor.map === currentMap)!.level;
     newNode.NodeID = addNodeID;
     newNode.ShortName = newNode.NodeID + "-ShortName";
     newNode.LongName = newNode.NodeID + "-LongName";
@@ -288,9 +288,14 @@ export default function MapEditing() {
             <section>
               <TransformComponent>
                 <SVGCanvas
-                  currentFloor={currentFloor}
+                  key={currentMap}
+                  currentMap={currentMap}
                   resetMapTransform={resetTransform}
                   newEdgeFlag={edgeFlag}
+                  currentLevel={
+                    floors.find((floor) => floor.map === currentMap)?.level ||
+                    ""
+                  }
                   handleNodeClicked={handleNodeClick}
                   nodeClicked={nodeClicked}
                   handleEdgeClicked={handleEdgeClicked}
@@ -336,7 +341,7 @@ export default function MapEditing() {
                   ))}
                 </SpeedDial>
                 <FloorSelect
-                  setFloor={setCurrentFloor}
+                  setMap={setCurrentMap}
                   isDirectionsClicked={isDirectionsClicked}
                   path={path}
                   resetMapTransform={resetTransform}
@@ -351,9 +356,13 @@ export default function MapEditing() {
           nodeClicked == undefined &&
           edgeClicked == undefined && (
             <div
-              className={`backdrop-blur-sm bg-secondary 
-                            border-[5px_solid_${GetColorblindColors().color4}] 
-                            text-black b-radius-[3%]`}
+              style={{
+                backgroundColor: "#e4e4e4",
+                border: `5px solid ${GetColorblindColors().color4}`,
+                color: "black",
+                borderRadius: "3%",
+              }}
+              className="backdrop-blur-sm"
             >
               <div>
                 <TableContainer sx={{ marginBottom: 2 }}>
@@ -428,7 +437,7 @@ export default function MapEditing() {
                   >
                     <Button
                       variant="contained"
-                      sx={{
+                      style={{
                         backgroundColor: GetColorblindColors().color4,
                         color: "white",
                       }}
@@ -467,9 +476,12 @@ export default function MapEditing() {
           nodeClicked == undefined &&
           edgeClicked == undefined && (
             <div
-              className={`backdrop-blur-sm bg-secondary 
-                            border-[5px_solid_${GetColorblindColors().color4}] 
-                            text-black b-radius-[3%]`}
+              style={{
+                backgroundColor: "#e4e4e4",
+                border: `5px solid ${GetColorblindColors().color4}`,
+                color: "black",
+                borderRadius: "3%",
+              }}
             >
               <TableContainer sx={{ marginBottom: 2 }}>
                 <Table sx={{ maxWidth: 350 }} aria-label="simple table">
@@ -504,7 +516,7 @@ export default function MapEditing() {
                 >
                   <Button
                     variant="contained"
-                    sx={{
+                    style={{
                       backgroundColor: GetColorblindColors().color4,
                       color: "white",
                     }}
@@ -538,9 +550,12 @@ export default function MapEditing() {
           )}
         {nodeClicked != undefined && nodeClicked != defaultNode && (
           <div
-            className={`backdrop-blur-sm bg-secondary 
-                            border-[5px_solid_${GetColorblindColors().color4}] 
-                            text-black b-radius-[3%]`}
+            style={{
+              backgroundColor: "#e4e4e4",
+              border: `5px solid ${GetColorblindColors().color4}`,
+              color: "black",
+              borderRadius: "3%",
+            }}
           >
             <TableContainer sx={{ maxWidth: 350, marginBottom: 2 }}>
               <Table sx={{ maxWidth: 350 }} aria-label="simple table">
@@ -749,9 +764,12 @@ export default function MapEditing() {
           edgeClicked != defaultEdge &&
           !edgeLock && (
             <div
-              className={`backdrop-blur-sm bg-secondary 
-                            border-[5px_solid_${GetColorblindColors().color4}] 
-                            text-black b-radius-[3%]`}
+              style={{
+                backgroundColor: "#e4e4e4",
+                border: `5px solid ${GetColorblindColors().color4}`,
+                color: "black",
+                borderRadius: "3%",
+              }}
             >
               <TableContainer sx={{ marginBottom: 2 }}>
                 <Table sx={{ maxWidth: 350 }} aria-label="simple table">

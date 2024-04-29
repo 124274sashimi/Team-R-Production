@@ -4,11 +4,7 @@ import firstFloorMap from "../assets/maps/01_thefirstfloor.png";
 import lowerLevel1Map from "../assets/maps/00_thelowerlevel1.png";
 import lowerLevel2Map from "../assets/maps/00_thelowerlevel2.png";
 
-export const defaultFloor = {
-  name: "First Floor",
-  map: firstFloorMap,
-  level: "1",
-};
+export const defaultMap = firstFloorMap;
 
 export const floors = [
   { name: "Third Floor", map: thirdFloorMap, level: "3" },
