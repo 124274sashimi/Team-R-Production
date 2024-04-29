@@ -13,6 +13,8 @@ import { EdgesCustomHook } from "../components/SVGCanvas.tsx";
 import { FloorSelect, MapControls } from "../components/MapUtils.tsx";
 import { defaultMap, floors } from "../components/mapElements.ts";
 
+import DoneIcon from "@mui/icons-material/Done";
+
 //import Table Items
 import Table from "@mui/material/Table";
 // import TableBody from '@mui/material/TableBody';
@@ -30,6 +32,7 @@ import SpeedDialIcon from "@mui/material/SpeedDialIcon";
 import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
 import LinearScaleIcon from "@mui/icons-material/LinearScale";
 import { GetColorblindColors } from "../components/colorblind.ts";
+import { useNavigate } from "react-router-dom";
 //import {c} from "vitest/dist/reporters-5f784f42";
 
 let edgeFlag = false;
@@ -250,6 +253,12 @@ export default function MapEditing() {
 
   const [open, setOpen] = React.useState(false);
 
+  const navigate = useNavigate();
+  const routeChange = (path: string) => {
+    const newPath = `/${path}`;
+    navigate(newPath);
+  };
+
   const actions = [
     {
       icon: <ScatterPlotIcon style={{ color: "white" }} />,
@@ -437,8 +446,9 @@ export default function MapEditing() {
                   >
                     <Button
                       variant="contained"
-                      style={{
-                        backgroundColor: GetColorblindColors().color4,
+
+                      sx={{
+                        backgroundColor: GetColorblindColors().color3,
                         color: "white",
                       }}
                       onClick={() => {
@@ -460,12 +470,15 @@ export default function MapEditing() {
                   >
                     <Button
                       variant="contained"
-                      color="error"
+                      style={{
+                        backgroundColor: GetColorblindColors().color4,
+                        color: "white",
+                      }}
                       onClick={() => {
                         setAddEdgeFormFlag(false);
                       }}
                     >
-                      Cancel
+                      CANCEL
                     </Button>
                   </Box>
                 </Stack>
@@ -516,8 +529,9 @@ export default function MapEditing() {
                 >
                   <Button
                     variant="contained"
-                    style={{
-                      backgroundColor: GetColorblindColors().color4,
+                    sx={{
+                      backgroundColor: GetColorblindColors().color3,
+
                       color: "white",
                     }}
                     onClick={() => {
@@ -537,12 +551,15 @@ export default function MapEditing() {
                 >
                   <Button
                     variant="contained"
-                    color="error"
+                    style={{
+                      backgroundColor: GetColorblindColors().color4,
+                      color: "white",
+                    }}
                     onClick={() => {
                       setAddNodeFormFlag(false);
                     }}
                   >
-                    Cancel
+                    CANCEL
                   </Button>
                 </Box>
               </Stack>
@@ -735,11 +752,14 @@ export default function MapEditing() {
               alignItems="center"
               minHeight="5vh"
               marginRight="5px"
-              className="pb-3"
+              className="pb-3 space-x-2 "
             >
               <Button
                 variant="contained"
-                color="error"
+                style={{
+                  backgroundColor: GetColorblindColors().color2,
+                  color: "white",
+                }}
                 onClick={() => {
                   delNodeDB("Single", nodeClicked.NodeID).then();
                   setNodeClicked(undefined);
@@ -756,6 +776,18 @@ export default function MapEditing() {
                 }}
               >
                 Delete Node
+              </Button>
+              <Button
+                variant="contained"
+                style={{
+                  backgroundColor: GetColorblindColors().color4,
+                  color: "white",
+                }}
+                onClick={() => {
+                  setNodeClicked(undefined);
+                }}
+              >
+                CANCEL
               </Button>
             </Box>
           </div>
@@ -848,11 +880,14 @@ export default function MapEditing() {
                 alignItems="center"
                 minHeight="5vh"
                 marginRight="5px"
-                className="pb-3"
+                className="pb-3 space-x-2"
               >
                 <Button
                   variant="contained"
-                  color="error"
+                  style={{
+                    backgroundColor: GetColorblindColors().color2,
+                    color: "white",
+                  }}
                   onClick={() => {
                     delEdgeDB("Single", edgeClicked.EdgeID).then();
                     setEdgeClicked(undefined);
@@ -865,6 +900,18 @@ export default function MapEditing() {
                 >
                   Delete Edge
                 </Button>
+                <Button
+                  variant="contained"
+                  style={{
+                    backgroundColor: GetColorblindColors().color4,
+                    color: "white",
+                  }}
+                  onClick={() => {
+                    setEdgeClicked(undefined);
+                  }}
+                >
+                  CANCEL
+                </Button>
               </Box>
             </div>
           )}
@@ -873,6 +920,23 @@ export default function MapEditing() {
           !addNodeFormFlag &&
           !addEdgeFormFlag) ||
           edgeLock) && <div></div>}
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: GetColorblindColors().color4,
+            color: "white",
+            "&:hover": {
+              backgroundColor: GetColorblindColors().color3,
+              color: GetColorblindColors().color4,
+            },
+          }}
+          onClick={() => {
+            routeChange("home");
+          }}
+        >
+          <DoneIcon />
+          DONE EDITING
+        </Button>
       </aside>
     </div>
   );
