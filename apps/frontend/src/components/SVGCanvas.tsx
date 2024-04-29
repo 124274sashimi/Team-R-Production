@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Edges, Nodes } from "database";
 import { Tooltip } from "@mui/material";
-import { motion } from "framer-motion";
 
 // import ElevatorIcon from '@mui/icons-material/Elevator';
 // import {SvgIcon} from "@mui/material";
@@ -10,7 +9,8 @@ import { motion } from "framer-motion";
 // import { IconButton } from '@mui/material';
 // import StairsTwoToneIcon from '@mui/icons-material/StairsTwoTone';
 import ElevatorIcon from "../assets/image/Elevator_Icon.svg";
-import { floors, defaultMap } from "./mapElements.ts";
+import { floors, defaultFloor } from "./mapElements.ts";
+import { GetColorblindColors } from "./colorblind.ts";
 
 export const EdgesCustomHook = () => {
   const [edgesData, setEdgesData] = useState<Edges[]>([]);
@@ -19,14 +19,17 @@ export const EdgesCustomHook = () => {
 
 export default function SVGCanvas(props: {
   path?: Nodes[]; //Array of nodes representing the path to be highlighted
-  currentMap: string; //The current map being displayed
-  setCurrentMap?: (map: string) => void; //Function to set the current map
   newEdgeFlag?: boolean; //Flag for if a new edge has been made
-  currentLevel: string; //The current level of the map
+  currentFloor: { name: string; map: string; level: string }; //The current level of the map
+  setCurrentFloor?: (floor: {
+    name: string;
+    map: string;
+    level: string;
+  }) => void; //Function to set the current map
   nodeColor?: string; //color for rendering nodes
   edgeColor?: string; //color for rendering edges
   nodeClicked?: Nodes | undefined; //The currently clicked node
-  handleNodeClicked?: (node: Nodes | undefined) => void; //Function to handle node clicks
+  handleNodeClicked?: (node: Nodes | undefined, isMouseClick: boolean) => void; //Function to handle node clicks
   edgeClicked?: Edges | undefined; //The currently clicked edge
   handleEdgeClicked?: (
     edge: Edges | undefined,
@@ -45,7 +48,7 @@ export default function SVGCanvas(props: {
 }) {
   const [nodesData, setNodesData] = React.useState<Nodes[]>([]);
   const { edgesData, setEdgesData } = EdgesCustomHook();
-  const [currentFloor, setCurrentFloor] = useState(props.currentLevel);
+  const [currentFloor, setCurrentFloor] = useState(props.currentFloor);
   const [hoverElevatorTooltip, setHoverElevatorTooltip] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -108,8 +111,8 @@ export default function SVGCanvas(props: {
 
   //useEffect to set floor to current level
   useEffect(() => {
-    setCurrentFloor(props.currentLevel);
-  }, [props.currentLevel]);
+    setCurrentFloor(props.currentFloor);
+  }, [props.currentFloor]);
 
   // console.log(props);
 
@@ -118,11 +121,12 @@ export default function SVGCanvas(props: {
    * It invokes the handleNodeClicked callback with the clicked node as an argument,
    * and resets the edge clicked state by invoking the handleEdgeClicked callback with undefined.
    * @param {Nodes} node - The clicked node.
+   * @param isMouseClick boolean to distinguish whether it's a mouse click
    */
-  function handleNodeClick(node: Nodes) {
+  function handleNodeClick(node: Nodes, isMouseClick: boolean) {
     // If handleNodeClicked callback is provided, invoke it with the clicked node
     if (props.handleNodeClicked) {
-      props.handleNodeClicked(node);
+      props.handleNodeClicked(node, isMouseClick);
     }
     // If handleEdgeClicked callback is provided, reset the edge clicked state by invoking it with undefined
     if (props.handleEdgeClicked) {
@@ -183,8 +187,8 @@ export default function SVGCanvas(props: {
     props.resetMapTransform();
 
     // Update the current map based on the changed floor
-    props.setCurrentMap!(
-      floors.find((floor) => floor.level === changedFloor)?.map || defaultMap,
+    props.setCurrentFloor!(
+      floors.find((floor) => floor.level === changedFloor) || defaultFloor,
     );
   }
 
@@ -247,7 +251,7 @@ export default function SVGCanvas(props: {
    * @param {Nodes} node - The node for which to determine the color.
    * @returns {string} Returns the color code for the node.
    */
-  const getNodeColor = (node: Nodes) => {
+  const getNodeColor = (node: Nodes): string => {
     // Check if props.path is defined and contains nodes
     if (props.path && props.path?.length > 0) {
       // Check if the node is an elevator or stairs
@@ -273,13 +277,13 @@ export default function SVGCanvas(props: {
       // Determine the color based on node properties and relevance to the path
       if (props.path?.[0].NodeID === node.NodeID) {
         // If the node is the start of the path, color it chartreuse
-        return "#3ECF04";
+        return GetColorblindColors().color5;
       } else if (props.path?.[props.path?.length - 1].NodeID === node.NodeID) {
         // If the node is the end of the path, color it red
-        return "red";
+        return GetColorblindColors().color8;
       } else if (isElevatorOrStairs && isRelevantElevatorOrStairs) {
         // If the node is a relevant elevator or stairs, color it purple
-        return "#009CA6";
+        return GetColorblindColors().color2;
       } else if (
         props.path?.some((pathNode) => pathNode.NodeID === node.NodeID)
       ) {
@@ -287,8 +291,8 @@ export default function SVGCanvas(props: {
         return "transparent";
       }
     }
-    // If none of the above conditions are met, return the default color "#003da6"
-    return "#003da6";
+    // If none of the above conditions are met, return the default color color1
+    return GetColorblindColors().color1;
   };
 
   function handleEdgeClick(edge: Edges) {
@@ -296,7 +300,7 @@ export default function SVGCanvas(props: {
       props.handleEdgeClicked(edge, true);
     }
     if (props.handleNodeClicked) {
-      props.handleNodeClicked(undefined);
+      props.handleNodeClicked(undefined, false);
     }
   }
 
@@ -325,7 +329,7 @@ export default function SVGCanvas(props: {
     }
     // Return true if the node meets the filtering criteria, false otherwise
     return (
-      node.Floor === props.currentLevel && // Node is on the current level
+      node.Floor === props.currentFloor.level && // Node is on the current level
       (!props.showPathOnly || // Show all nodes or
         isPartOfPath || // node is part of the path or
         (isElevator && isRelevantElevator)) // node is a relevant elevator
@@ -348,7 +352,7 @@ export default function SVGCanvas(props: {
    * This function generates splices of the path based on floor changes.
    * @returns {Array<Array<Nodes>>} Returns an array containing arrays of nodes grouped by floor.
    */
-  const splices = () => {
+  const splices = (): Array<Array<Nodes>> => {
     // Check if props.path is defined
     if (props.path) {
       // Initialize an array to store splices of the path
@@ -461,7 +465,7 @@ export default function SVGCanvas(props: {
         console.log(draggingNode, "here");
         props.editNodeDB!(draggingNode.NodeID, "Xcoord", draggingNode.Xcoord);
         props.editNodeDB!(draggingNode.NodeID, "Ycoord", draggingNode.Ycoord);
-        handleNodeClick(draggingNode);
+        handleNodeClick(draggingNode, false);
       }
       setIsDragging(false);
       setDraggingNode(undefined);
@@ -487,72 +491,56 @@ export default function SVGCanvas(props: {
       width="auto"
       preserveAspectRatio="xMidYMid meet"
       viewBox="0 0 5000 3400"
-      overflow="visible"
+      overflow="clip"
       onMouseMove={(e) => handleMouseMove(e)}
       onMouseUp={(e) => handleMouseUp(e)}
     >
-      <image href={props.currentMap} height="3400" width="5000" />
-      {props.path && // Render the path only if props.path is defined
-        splices()[0][0] && // Ensure the splices array is not empty
-        splices().map((splice, index) => {
-          if (splice.every((node) => node.Floor === currentFloor)) {
-            const totalLength = splice.length;
-            return splice.map((node, i) => {
-              const nextNode = splice[i + 1];
-              if (nextNode) {
-                return (
-                  <>
-                    <path
-                      d={`M ${splice[0].Xcoord},${splice[0].Ycoord} ${splice
-                        .slice(1)
-                        .map((node) => `L ${node.Xcoord},${node.Ycoord}`)
-                        .join(" ")}`}
-                      stroke="#012d5a"
-                      strokeWidth="13"
-                      fill="none"
-                    />
+      <image href={props.currentFloor.map} height="3400" width="5000" />
 
-                    <motion.path
-                      key={`${index}`}
-                      d={`M ${splice[0].Xcoord},${splice[0].Ycoord} ${splice
-                        .slice(1)
-                        .map((node) => `L ${node.Xcoord},${node.Ycoord}`)
-                        .join(" ")}`}
-                      stroke="#009CA6"
-                      strokeWidth="4"
-                      fill="none"
-                      initial={{
-                        pathLength: 0,
-                        strokeDasharray: "100 50",
-                        strokeDashoffset: "100",
-                      }}
-                      animate={{ pathLength: 2, strokeDashoffset: 0 }}
-                      transition={{
-                        duration: 0.5 * totalLength,
-                        ease: "linear",
-                        repeat: Infinity,
-                        repeatDelay: 0.01,
-                      }}
-                    />
-                  </>
-                );
-              }
-              return null; // Return null if the conditions are not met (no line to render)
-            });
-          }
-          return null;
-        })}
+      {props.path &&
+        splices()[0][0] &&
+        splices()
+          .filter((splice) => splice[0].Floor === currentFloor.level)
+          .map((current_splice) => {
+            if (
+              current_splice?.every((node) => node.Floor === currentFloor.level)
+            ) {
+              const poly = (props: { style: string; strokeWidth: string }) => (
+                <polyline
+                  className={`animate-dash-path ${props.style}`}
+                  fill="none"
+                  strokeDasharray="20" //this must be half of the value of strokeDashoffset in tailwind.config.js
+                  strokeWidth={props.strokeWidth}
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                  points={current_splice
+                    ?.map((node) => `${node.Xcoord},${node.Ycoord}`)
+                    .join(" ")}
+                />
+              );
+              return (
+                <>
+                  {poly({ style: "stroke-primary", strokeWidth: "10" })}
+                  {poly({
+                    style: GetColorblindColors().color6,
+                    strokeWidth: "6",
+                  })}
+                </>
+              );
+            }
+            return undefined;
+          })}
 
       {/* Map over each edge in the filteredEdges array, defaulting to an empty array if filteredEdges is null or undefined */}
       {(filteredEdges ?? []).map((edge) => {
-        const startNode = filteredNodes.filter(
+        const startNode = filteredNodes.find(
           // Find the start node of the current edge in the filteredNodes array
           (node) => node.NodeID === edge.StartNodeID,
-        )[0];
-        const endNode = filteredNodes.filter(
+        );
+        const endNode = filteredNodes.find(
           // Find the end node of the current edge in the filteredNodes array
           (node) => node.NodeID === edge.EndNodeID,
-        )[0];
+        );
         return (
           //Create line that follow edges
           <g
@@ -561,16 +549,15 @@ export default function SVGCanvas(props: {
             }}
           >
             <line
-              x1={startNode.Xcoord}
-              y1={startNode.Ycoord}
-              x2={endNode.Xcoord}
-              y2={endNode.Ycoord}
-              stroke={props.edgeColor ?? "blue"}
+              x1={startNode?.Xcoord}
+              y1={startNode?.Ycoord}
+              x2={endNode?.Xcoord}
+              y2={endNode?.Ycoord}
+              stroke={props.edgeColor ?? GetColorblindColors().color7}
               strokeWidth="5"
             />
           </g>
         );
-        return null;
       })}
       {filteredNodes.map((node) => (
         <g>
@@ -611,7 +598,7 @@ export default function SVGCanvas(props: {
           ) : (
             <Tooltip title={node.LongName} arrow>
               <circle
-                onClick={() => handleNodeClick(node)}
+                onClick={() => handleNodeClick(node, true)}
                 onMouseEnter={() =>
                   props.handleNodeHover && props.handleNodeHover(node)
                 }

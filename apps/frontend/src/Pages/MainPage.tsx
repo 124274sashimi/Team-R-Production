@@ -1,6 +1,5 @@
 //This is the main page with the map, staff sign in, etc on the first slide in Figma.
 
-import SideBar from "../components/SideBar.tsx";
 import React, { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import SVGCanvas from "../components/SVGCanvas.tsx";
@@ -25,14 +24,18 @@ import { autocompleteStyle } from "../styles/muiStyles.ts";
 import TurnLeftIcon from "@mui/icons-material/TurnLeft";
 import TurnRightIcon from "@mui/icons-material/TurnRight";
 import StraightIcon from "@mui/icons-material/Straight";
+import ElevatorIcon from "@mui/icons-material/Elevator";
+import MyLocationIcon from "@mui/icons-material/MyLocation";
+import EscalatorIcon from "@mui/icons-material/Escalator";
 import SyncIcon from "@mui/icons-material/Sync";
 import {
   floors,
   pathfindingAlgorithms,
-  defaultMap,
+  defaultFloor,
 } from "../components/mapElements.ts";
 import { rightSideBarStyle } from "../styles/RightSideBarStyle.ts";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { GetColorblindColors } from "../components/colorblind.ts";
 
 export default function MainPage() {
   //Use auth0 react hook
@@ -42,7 +45,7 @@ export default function MainPage() {
   const [end, setEnd] = useState("");
   const [nodes, setNodes] = useState<Nodes[]>();
   const [path, setPath] = useState<Nodes[]>([]);
-  const [currentMap, setCurrentMap] = useState(defaultMap);
+  const [currentFloor, setCurrentFloor] = useState(defaultFloor);
   const [clickTimes, setClickTimes] = useState<number>(0);
   const [pathfindingAlgorithm, setPathfindingAlgorithm] = useState(
     "/api/map/pathfind/a-star",
@@ -50,6 +53,10 @@ export default function MainPage() {
   const [showPathOnly, setShowPathOnly] = useState(false);
   const [isDirectionsClicked, setIsDirectionsClicked] = useState(false);
   const [pathDirections, setPathDirections] = useState<string[][]>([]);
+  const [expandedAccordion, setExpandedAccordion] = useState<string | null>(
+    null,
+  );
+
   // const navigate = useNavigate();
   // const routeChange = (path: string) => {
   //   const newPath = `/${path}`;
@@ -116,9 +123,8 @@ export default function MainPage() {
       const startingFloor: string = startNodeArray[0].Floor;
 
       // Setting current map based on the starting floor
-      setCurrentMap(
-        floors.find((floor) => floor.level === startingFloor)?.map ||
-          defaultMap,
+      setCurrentFloor(
+        floors.find((floor) => floor.level === startingFloor) || defaultFloor,
       );
 
       // Extracting end node ID
@@ -144,37 +150,22 @@ export default function MainPage() {
       console.error("Start or end node not found");
     }
   }
+  const directionsList = [
+    { dir: "straight", icon: <StraightIcon /> },
+    { dir: "left", icon: <TurnLeftIcon /> },
+    { dir: "right", icon: <TurnRightIcon /> },
+    { dir: "elevator", icon: <ElevatorIcon /> },
+    { dir: "stairs", icon: <EscalatorIcon /> },
+    { dir: "arrived", icon: <MyLocationIcon /> },
+  ];
 
   const pathToText = (direction: string) => {
-    // straight
-    if (direction.includes("straight")) {
-      return (
-        <Box mb={2} display="flex" gap={1} alignItems="center">
-          <StraightIcon />
-          {direction}
-        </Box>
-      );
-    }
-
-    // turn left
-    if (direction.includes("left")) {
-      return (
-        <Box mb={2} display="flex" gap={1} alignItems="center">
-          <TurnLeftIcon />
-          {direction}
-        </Box>
-      );
-    }
-
-    // turn right
-    if (direction.includes("right")) {
-      return (
-        <Box mb={2} display="flex" gap={1} alignItems="center">
-          <TurnRightIcon />
-          {direction}
-        </Box>
-      );
-    }
+    return (
+      <Box mb={2} display="flex" gap={1} alignItems="center">
+        {directionsList.find((item) => direction.includes(item.dir))?.icon}
+        {direction}
+      </Box>
+    );
   };
 
   const groupPath: { [key: string]: Nodes[] } = useMemo(() => {
@@ -193,7 +184,6 @@ export default function MainPage() {
       id="MainPage"
       className="flex h-screen overflow-hidden flex-row bg-[#d6d8d5]"
     >
-      <SideBar />
       <main className="flex content-center justify-center leading-none relative">
         <TransformWrapper alignmentAnimation={{ sizeX: 0, sizeY: 0 }}>
           {}
@@ -201,15 +191,10 @@ export default function MainPage() {
             <section id="map">
               <TransformComponent>
                 <SVGCanvas
-                  key={currentMap}
                   path={path}
-                  currentMap={currentMap}
-                  setCurrentMap={setCurrentMap}
+                  currentFloor={currentFloor}
+                  setCurrentFloor={setCurrentFloor}
                   resetMapTransform={resetTransform}
-                  currentLevel={
-                    floors.find((floor) => floor.map === currentMap)?.level ||
-                    ""
-                  }
                   handleNodeClicked={(node) => {
                     const newClickTimes = clickTimes + 1;
                     setClickTimes(newClickTimes);
@@ -231,7 +216,7 @@ export default function MainPage() {
                   zoomOut={zoomOut}
                 ></MapControls>
                 <FloorSelect
-                  setMap={setCurrentMap}
+                  setFloor={setCurrentFloor}
                   isDirectionsClicked={isDirectionsClicked}
                   path={path}
                   resetMapTransform={resetTransform}
@@ -286,8 +271,8 @@ export default function MainPage() {
                       color: "white",
                       borderColor: "white",
                       "&:hover": {
-                        borderColor: "#f6bd38",
-                        color: "#f6bd38",
+                        borderColor: GetColorblindColors().color3,
+                        color: GetColorblindColors().color3,
                       },
                     }}
                     onClick={() => {
@@ -299,14 +284,14 @@ export default function MainPage() {
                     Get Directions
                   </Button>
                   <Button
-                    className="content-center "
+                    className="content-center"
                     variant="outlined"
                     sx={{
                       color: "white",
                       borderColor: "white",
                       "&:hover": {
-                        borderColor: "#f6bd38",
-                        color: "#f6bd38",
+                        borderColor: GetColorblindColors().color3,
+                        color: GetColorblindColors().color3,
                       },
                     }}
                     onClick={() => {
@@ -314,7 +299,6 @@ export default function MainPage() {
                       setIsDirectionsClicked(false);
                       resetTransform();
                     }}
-                    style={{ marginLeft: "auto" }}
                   >
                     Reset Map
                   </Button>
@@ -329,7 +313,7 @@ export default function MainPage() {
                     {
                       boxShadow:
                         "0px 3px 1px -2px rgba(0,0,0,0.2),0px 2px 2px 0px rgba(0,0,0,0.14),0px 1px 5px 0px rgba(0,0,0,0.12)",
-                      backgroundColor: "#009CA6",
+                      backgroundColor: GetColorblindColors().color2,
                       color: "white",
                     },
                   ]}
@@ -339,20 +323,24 @@ export default function MainPage() {
                   ))}
                 </Select>
                 {path.length > 0 && (
-                  <Box maxWidth={330}>
+                  <Box maxWidth={330} className="overflow-y-scroll">
                     <Box mb={2} display="flex" gap={1} alignItems="center">
                       <SyncIcon />
                       {end} from {start}
                     </Box>
-                    {pathDirections.map((floorDirections) => (
+                    {pathDirections.map((floorDirections, index) => (
                       <Accordion
                         key={floorDirections[0]}
-                        onChange={() => {
+                        expanded={expandedAccordion === `panel${index}`}
+                        onChange={(event, isExpanded) => {
                           const matchedFloor = floors.find(
                             (floor) => floor.name === floorDirections[0],
                           );
+                          setExpandedAccordion(
+                            isExpanded ? `panel${index}` : null,
+                          );
                           resetTransform();
-                          setCurrentMap(matchedFloor ? matchedFloor.map : "");
+                          setCurrentFloor(matchedFloor || defaultFloor);
                         }}
                       >
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>

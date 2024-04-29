@@ -4,6 +4,7 @@ import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import { buttonStyle } from "../styles/muiStyles";
 import { floors } from "./mapElements.ts";
 import { Nodes } from "database";
+import { GetColorblindColors } from "./colorblind.ts";
 
 export function MapControls(props: {
   zoomOut: () => void;
@@ -20,9 +21,9 @@ export function MapControls(props: {
           sx={{
             padding: "20px",
             fontSize: "15px",
-            backgroundColor: "#009CA6",
+            backgroundColor: GetColorblindColors().color2,
             ":hover": {
-              backgroundColor: "#012d5a",
+              backgroundColor: GetColorblindColors().color4,
             },
           }}
         />
@@ -32,9 +33,9 @@ export function MapControls(props: {
           sx={{
             padding: "20px",
             fontSize: "15px",
-            backgroundColor: "#009CA6",
+            backgroundColor: GetColorblindColors().color2,
             ":hover": {
-              backgroundColor: "#012d5a",
+              backgroundColor: GetColorblindColors().color4,
             },
           }}
         />
@@ -44,9 +45,9 @@ export function MapControls(props: {
           sx={{
             padding: "20px",
             fontSize: "15px",
-            backgroundColor: "#009CA6",
+            backgroundColor: GetColorblindColors().color2,
             ":hover": {
-              backgroundColor: "#012d5a",
+              backgroundColor: GetColorblindColors().color4,
             },
           }}
         />
@@ -57,13 +58,17 @@ export function MapControls(props: {
 }
 
 export function FloorSelect(props: {
-  setMap: (newMap: string) => void;
+  setFloor: (newFloor: { name: string; map: string; level: string }) => void;
   isDirectionsClicked: boolean;
   path: Nodes[];
   resetMapTransform: () => void;
 }) {
-  const handleFloorChange = (newMap: string) => {
-    props.setMap(newMap);
+  const handleFloorChange = (newFloor: {
+    name: string;
+    map: string;
+    level: string;
+  }) => {
+    props.setFloor(newFloor);
     props.resetMapTransform();
   };
   return (
@@ -82,23 +87,23 @@ export function FloorSelect(props: {
       {floors.map((floor, index) => (
         <Button
           key={index}
-          onClick={() => handleFloorChange(floor.map)}
+          onClick={() => handleFloorChange(floor)}
           sx={
             props.isDirectionsClicked &&
             props.path.some((node) => node.Floor === floor.level)
               ? {
                   animation: "breathing 2s infinite",
                   "@keyframes breathing": {
-                    "0%": { backgroundColor: "#009CA6" },
-                    "50%": { backgroundColor: "#f6bd39" },
-                    "100%": { backgroundColor: "#009CA6" },
+                    "0%": { backgroundColor: GetColorblindColors().color2 },
+                    "50%": { backgroundColor: GetColorblindColors().color3 },
+                    "100%": { backgroundColor: GetColorblindColors().color2 },
                   },
                 }
               : {
-                  backgroundColor: "#009CA6",
+                  backgroundColor: GetColorblindColors().color2,
 
                   ":hover": {
-                    backgroundColor: "#012d5a",
+                    backgroundColor: GetColorblindColors().color4,
                   },
                 }
           }
