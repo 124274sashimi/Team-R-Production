@@ -384,20 +384,66 @@ export default function Sidebar() {
         {/*Rounded full makes the arrow be in a circle*/}
         {/*-right-4 and top-9 control the position relative to the container*/}
 
-        <div className="inline-flex items-center">
-          <img
-            className="w-10 rounded cursor-pointer block float-left mr-2"
-            src={BWHLogo}
-            alt={""}
-            onClick={() => handleMenuClick(home.title)}
-          ></img>
-          <h1
-            className={`text-white pl-5 origin-left font-medium text-2xl duration-300 ${
-              !open && "scale-0"
-            }`}
-          >
-            {t("Welcome")}
-          </h1>
+        <div
+          className={`${open ? "inline-flex" : "flex-col"} items-center pb-5`}
+        >
+          <div className="inline-flex items-center gap-x-5 flex-grow">
+            <img
+              className="w-10 rounded cursor-pointer"
+              src={BWHLogo}
+              alt={"logo"}
+              onClick={() => handleMenuClick(home.title)}
+            ></img>
+            <h1
+              className={`text-white origin-left font-medium text-2xl duration-300 ${
+                !open && "scale-0"
+              }`}
+            >
+              {t("Welcome")}
+            </h1>
+          </div>
+
+          <div>
+            {ready && (
+              <Box sx={{ width: "100%" }}>
+                <IconButton
+                  sx={{ color: "white" }}
+                  onClick={(event: React.MouseEvent) => handleClick(event)}
+                >
+                  <LanguageIcon />
+                </IconButton>
+                <Popover
+                  id={id}
+                  open={languageOpen}
+                  anchorEl={anchorEl}
+                  onClose={handleClose}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "right",
+                  }}
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                >
+                  <Box display="flex" flexDirection="column" minWidth={80}>
+                    {[
+                      { name: "English", code: "en" },
+                      { name: "Chinese", code: "zh" },
+                    ].map((language) => (
+                      <Button
+                        sx={{ textTransform: "none" }}
+                        onClick={() => changeLanguage(language.code)}
+                      >
+                        {language.name}
+                      </Button>
+                    ))}
+                  </Box>
+                </Popover>
+              </Box>
+            )}
+          </div>
+          <hr />
         </div>
 
         <ul className="pt-2">
@@ -438,45 +484,6 @@ export default function Sidebar() {
         <div className="flex-grow"></div>
 
         <div className="pb-2">
-          {ready && (
-            <Box sx={{ width: "100%" }}>
-              <IconButton
-                sx={{ color: "white" }}
-                onClick={(event: React.MouseEvent) => handleClick(event)}
-              >
-                <LanguageIcon />
-              </IconButton>
-              <Popover
-                id={id}
-                open={languageOpen}
-                anchorEl={anchorEl}
-                onClose={handleClose}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "right",
-                }}
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-              >
-                <Box display="flex" flexDirection="column" minWidth={80}>
-                  <Button
-                    style={{ textTransform: "none" }}
-                    onClick={() => changeLanguage("en")}
-                  >
-                    English
-                  </Button>
-                  <Button
-                    style={{ textTransform: "none" }}
-                    onClick={() => changeLanguage("zh")}
-                  >
-                    Chinese
-                  </Button>
-                </Box>
-              </Popover>
-            </Box>
-          )}
           <li
             className="text-white text-2xl flex items-center gap-x-8 cursor-pointer p-2 hover:bg-blue-300 hover:bg-secondary/25 hover:border-r-4 rounded-md mt-2"
             onClick={() => setOpen(!open)}
