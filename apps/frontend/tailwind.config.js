@@ -7,11 +7,24 @@ export default {
         primary: "#012d5a",
         secondary: "#e4e4e4",
         tertiary: "#f6bd39",
+        translucentGrey: "rgb(103,124,143,0.6)",
+        teal: "#009CA6",
+        brown: "#874a22",
+        lightbrown: "#bf8056",
+        lightred: "#c25b5b",
       },
       fontFamily: {
         sans: ["Open Sans", "sans-serif"],
         helvetica: ["helvetica"],
         Garamond: ["Garamond"],
+      },
+      animation: {
+        "dash-path": "dash infinite reverse linear " + "1s", // 1s duration. This controls speed of animation. Higher is slower.
+      },
+      keyframes: {
+        dash: {
+          to: { strokeDashoffset: 40 }, //needs to be double of strokeDasharray
+        },
       },
     },
   },

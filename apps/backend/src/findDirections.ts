@@ -1,4 +1,6 @@
 import { GraphNode } from "./graph.ts";
+// import { Nodes } from "database";
+// import PrismaClient from "../src/bin/database-connection.ts";
 export class Directions {
   directions: string[][] = [];
   path: GraphNode[];
@@ -28,14 +30,10 @@ export class Directions {
     return angle;
   }
 
-  // public getCardDirection(start: GraphNode, end: GraphNode) {
-  //   const g1: GraphNode = new GraphNode("id", start.x, start.y - 50, 1);
-  // }
-
   /**
    * Function that uses getAngles on all nodes in a path
    */
-  public getAngles(): string[][] {
+  public getAngles() {
     const path = this.path;
     const angles: number[] = [];
     //const directions: string[][] = [];
@@ -43,34 +41,7 @@ export class Directions {
     //const i = 0;
     this.directions.push([]);
     this.directions[j].push(floorName(this.path[0].z));
-    // for (let i = 0; i < 2; i++) {
-    //   if (
-    //     this.path[i] &&
-    //     this.path[i + 1] &&
-    //     this.path[i].z === this.path[i + 1].z
-    //   ) {
-    //       const g1 = new GraphNode(i.toString(), this.path[i].x, this.path[i].y - 50, this.path[i].z);
-    //       const dir = this.getAngle(g1, this.path[i], this.path[i+1]);
-    //       if(dir <= 22.5 && dir >= 337.5){
-    //         this.directions[i].push("head south towards " + this.path[1]);
-    //       }else if(dir > 22.5 && dir < 67.5){
-    //           this.directions[i].push("head southwest towards " + this.path[1]);
-    //       }else if(dir >= 67.5 && dir <= 112.5){
-    //           this.directions[i].push("head west towards " + this.path[1]);
-    //       }else if(dir > 112.5 && dir < 157.5){
-    //           this.directions[i].push("head northwest towards " + this.path[1]);
-    //       }else if(dir >= 157.5 && dir <= 202.5){
-    //           this.directions[i].push("head north towards " + this.path[1]);
-    //       }else if(dir > 202.5 && dir < 247.5){
-    //           this.directions[i].push("head northeast towards " + this.path[1]);
-    //       }else if(dir >= 247.5 && dir <= 292.5){
-    //           this.directions[i].push("head east towards " + this.path[1]);
-    //       }else if(dir > 292.5 && dir < 337.5){
-    //           this.directions[i].push("head southeast towards " + this.path[1]);
-    //       }
-    //
-    //   }
-    // }
+
     //pushes that list of angles to a seperate array
 
     for (let i = 0; i < path.length; i++) {
@@ -92,114 +63,221 @@ export class Directions {
         if (path[i] && path[i - 1] && path[i].z != path[i - 1].z) {
           // does it chnage floors?
           this.directions.push([]);
+          this.directions[j].push(
+            this.floorChange(this.path[i - 1].longName) +
+              this.path[i - 1].id +
+              " to " +
+              this.path[i].id,
+          );
           j++;
           this.directions[j].push(floorName(this.path[i].z));
         }
-        this.directions[j].push("sharp right at " + this.path[i + 1].id); //message to be put into 2d array
+        this.directions[j].push("sharp right at " + this.path[i + 1].longName); //message to be put into 2d array
       } else if (angles[i] >= 60 && angles[i] <= 120) {
         if (path[i] && path[i - 1] && path[i].z != path[i - 1].z) {
           this.directions.push([]);
+          this.directions[j].push(
+            this.floorChange(this.path[i - 1].longName) +
+              this.path[i - 1].longName +
+              " to " +
+              this.path[i].longName,
+          );
           j++;
           this.directions[j].push(floorName(this.path[i].z));
         }
-        this.directions[j].push("right at " + this.path[i + 1].id);
+        this.directions[j].push("right at " + this.path[i + 1].longName);
       } else if (angles[i] > 120 && angles[i] <= 165) {
         if (path[i] && path[i - 1] && path[i].z != path[i - 1].z) {
           this.directions.push([]);
+          this.directions[j].push(
+            this.floorChange(this.path[i - 1].longName) +
+              this.path[i - 1].longName +
+              " to " +
+              this.path[i].longName,
+          );
           j++;
           this.directions[j].push(floorName(this.path[i].z));
         }
-        this.directions[j].push("slight right at " + this.path[i + 1].id);
+        this.directions[j].push("slight right at " + this.path[i + 1].longName);
       } else if (angles[i] > 165 && angles[i] <= 195) {
         if (path[i] && path[i - 1] && path[i].z != path[i - 1].z) {
           this.directions.push([]);
+          this.directions[j].push(
+            this.floorChange(this.path[i - 1].longName) +
+              this.path[i - 1].longName +
+              " to " +
+              this.path[i].longName,
+          );
           j++;
           this.directions[j].push(floorName(this.path[i].z));
         }
-        this.directions[j].push("straight at " + this.path[i + 1].id);
+        this.directions[j].push("straight at " + this.path[i + 1].longName);
       } else if (angles[i] > 195 && angles[i] <= 240) {
         if (path[i] && path[i - 1] && path[i].z != path[i - 1].z) {
           this.directions.push([]);
+          this.directions[j].push(
+            this.floorChange(this.path[i - 1].longName) +
+              this.path[i - 1].longName +
+              " to " +
+              this.path[i].longName,
+          );
           j++;
           this.directions[j].push(floorName(this.path[i].z));
         }
-        this.directions[j].push("slight left at " + this.path[i + 1].id);
+        this.directions[j].push("slight left at " + this.path[i + 1].longName);
       } else if (angles[i] > 240 && angles[i] <= 300) {
         if (path[i] && path[i - 1] && path[i].z != path[i - 1].z) {
           this.directions.push([]);
+          this.directions[j].push(
+            this.floorChange(this.path[i - 1].longName) +
+              this.path[i - 1].longName +
+              " to " +
+              this.path[i].longName,
+          );
           j++;
           this.directions[j].push(floorName(this.path[i].z));
         }
-        this.directions[j].push("left at " + this.path[i + 1].id);
+        this.directions[j].push("left at " + this.path[i + 1].longName);
       } else if (angles[i] >= 300 && angles[i] < 360) {
         if (path[i] && path[i - 1] && path[i].z != path[i - 1].z) {
           this.directions.push([]);
+          this.directions[j].push(
+            this.floorChange(this.path[i - 1].longName) +
+              this.path[i - 1].longName +
+              " to " +
+              this.path[i].longName,
+          );
           j++;
           this.directions[j].push(floorName(this.path[i].z));
         }
-        this.directions[j].push("sharp left at " + this.path[i + 1].id);
+        this.directions[j].push("sharp left at " + this.path[i + 1].longName);
       } else if (angles[i] == 0 || angles[i] == 360) {
         if (path[i] && path[i - 1] && path[i].z != path[i - 1].z) {
           this.directions.push([]);
+          this.directions[j].push(
+            this.floorChange(this.path[i - 1].longName) +
+              this.path[i - 1].longName +
+              " to " +
+              this.path[i].longName,
+          );
           j++;
           this.directions[j].push(floorName(this.path[i].z));
         }
-        this.directions[j].push("take elevator at  " + this.path[i + 1].id);
+        this.directions[j].push(
+          "take elevator at  " + this.path[i + 1].longName,
+        );
       }
     }
-    this.cleanDirections();
 
-    //directions[directions.length-1].push("Arrived at " + this.path[this.path.length - 1].id);
+    this.cleanDirections();
+    if (angles.length == 0) {
+      this.directions[this.directions.length - 1].push(
+        this.floorChange(this.path[path.length - 1].longName) +
+          this.path[0].longName +
+          " to " +
+          this.path[1].longName,
+      );
+    }
+    this.directions[this.directions.length - 1].push(
+      "arrived at " + this.path[path.length - 1].longName,
+    );
+
     return this.directions;
   }
 
   public cleanDirections() {
     for (let i = 0; i < this.directions.length; i++) {
-      if (this.directions[i].length >= 2) {
+      if (this.directions[i].length > 2) {
         if (
-          this.directions[i][this.directions[i].length - 2].indexOf("ELE") != -1
+          (this.directions[i][this.directions[i].length - 2].indexOf("Elev") !=
+            -1 ||
+            this.directions[i][this.directions[i].length - 2].indexOf("Stai") !=
+              -1 ||
+            this.directions[i][this.directions[i].length - 2].indexOf("Esca") !=
+              -1) &&
+          this.directions[i][this.directions[i].length - 2].indexOf(
+            "take the",
+          ) == -1
         ) {
+          this.directions[i][this.directions[i].length - 2] =
+            this.directions[i][this.directions[i].length - 1];
           this.directions[i].pop();
         }
       }
-      if (this.directions[i].length >= 3) {
+      if (this.directions[i].length > 2) {
         if (
-          this.directions[i][this.directions[i].length - 3].indexOf("ELE") != -1
+          (this.directions[i][this.directions[i].length - 2].indexOf("Elev") !=
+            -1 ||
+            this.directions[i][this.directions[i].length - 2].indexOf("Stai") !=
+              -1 ||
+            this.directions[i][this.directions[i].length - 2].indexOf("Esca") !=
+              -1) &&
+          this.directions[i][this.directions[i].length - 2].indexOf(
+            "take the",
+          ) == -1
         ) {
+          this.directions[i][this.directions[i].length - 2] =
+            this.directions[i][this.directions[i].length - 1];
           this.directions[i].pop();
         }
       }
-      if (
-        this.directions[i][this.directions[i].length - 1].indexOf("ELE") != -1
-      ) {
-        this.directions[i].pop();
+      if (this.directions[i].length > 2) {
+        if (
+          (this.directions[i][this.directions[i].length - 2].indexOf("Elev") !=
+            -1 ||
+            this.directions[i][this.directions[i].length - 2].indexOf("Stai") !=
+              -1 ||
+            this.directions[i][this.directions[i].length - 2].indexOf("Esca") !=
+              -1) &&
+          this.directions[i][this.directions[i].length - 2].indexOf(
+            "take the",
+          ) == -1
+        ) {
+          this.directions[i][this.directions[i].length - 2] =
+            this.directions[i][this.directions[i].length - 1];
+          this.directions[i].pop();
+        }
       }
     }
-    //this.directions[0].push("test");
-    // if (
-    //   this.directions[0].length == 2 &&
-    //   (this.directions[0][1].indexOf("ELE") != -1 ||
-    //     this.directions[0][1].indexOf("STAI") != -1)
-    // ) {
-    //   this.directions[0].pop();
-    //   this.directions[0].push("test");
-    // }
   }
+
+  public floorChange(type: string): string {
+    if (type.includes("Stai")) {
+      return "take the stairs at ";
+    } else if (type.includes("Elev")) {
+      return "take the elevator at ";
+    } else if (type.includes("Esca")) {
+      return "take the escalator at ";
+    } else return "";
+  }
+
+  // async getNodeLongName(id: string): Promise<string> {
+  //   const node: Nodes | null = await PrismaClient.nodes.findUnique({
+  //     where: {
+  //       NodeID: id,
+  //     },
+  //   });
+  //   if (node) {
+  //     return node.LongName;
+  //   } else {
+  //     return "";
+  //   }
+  // }
 }
 
 //Helper function for inserting floor name
 const floorName = (zVal: number) => {
   switch (zVal) {
-    case 300: {
+    case 600: {
       return "Third Floor";
     }
-    case 200: {
+    case 400: {
       return "Second Floor";
     }
-    case 100: {
+    case 200: {
       return "First Floor";
     }
-    case -100: {
+    case 0: {
       return "Lower Level 1";
     }
     case -200: {

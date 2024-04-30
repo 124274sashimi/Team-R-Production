@@ -4,9 +4,7 @@ import isAdmin from "../components/adminChecker.ts";
 import { Employee } from "../Interfaces/Employee.ts";
 // import { RequestContext } from "../App";
 // import {useNavigate} from "react-router-dom";
-
 import DensitySmallIcon from "@mui/icons-material/DensitySmall";
-
 import {
   Box,
   Button,
@@ -19,12 +17,10 @@ import {
   TextField,
   InputLabel,
 } from "@mui/material";
-import Sidebar from "../components/SideBar.tsx";
 import { GeneralRequest } from "database";
 import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
 // import swoosh from "../assets/swoosh.png";
-
 import LocalFloristIcon from "@mui/icons-material/LocalFlorist";
 import CardGiftcardIcon from "@mui/icons-material/CardGiftcard";
 import BuildIcon from "@mui/icons-material/Build";
@@ -32,6 +28,8 @@ import VaccinesIcon from "@mui/icons-material/Vaccines";
 import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
 import CasinoIcon from "@mui/icons-material/Casino";
 import { ListOfServices } from "../components/FullServiceRequest";
+import { GetColorblindColors } from "../components/colorblind.ts";
+import { useTranslation } from "react-i18next";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -101,6 +99,8 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
     employee: "",
     status: "",
   });
+
+  const { t } = useTranslation();
 
   let filteredRequestData: GeneralRequest[] = [];
   if (requestData.length != 0) {
@@ -226,26 +226,18 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
 
   return (
     <Box display="flex">
-      <Sidebar />
-
       <div
-        className="overflow-y-auto flex-grow justify-center items-center bg-cover bg-center backdrop-blur-sm bg-no-repeat"
+        className=" flex-grow justify-center overflow-y-auto h-screen bg-cover bg-center backdrop-blur-sm bg-no-repeat"
         style={{
           // backgroundImage: `url(${swoosh})`,
-          width: "100vw",
-          height: "100vh",
           backgroundColor: "white",
         }}
       >
         <div>
           <div className=" top-0 min-w-full pt-8 bg-primary">
-            {/*// style={{*/}
-            {/*//     backgroundColor: "#009CA6",*/}
-            {/*//     // opacity: 0.5,*/}
-            {/*// }}>*/}
             <Box
               sx={{
-                backgroundColor: "#009CA6",
+                backgroundColor: GetColorblindColors().color2,
                 borderColor: "white",
                 display: "flex",
                 justifyContent: "center",
@@ -254,13 +246,15 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
               }}
             >
               <Tabs
-                TabIndicatorProps={{ style: { backgroundColor: "#f6bd39" } }}
+                TabIndicatorProps={{
+                  style: { backgroundColor: GetColorblindColors().color3 },
+                }}
                 value={selectedTable}
                 onChange={(event, newValue) => setSelectedTable(newValue)}
                 aria-label="basic tabs example"
               >
                 <Tab
-                  label=" All "
+                  label={t("All")}
                   icon={
                     <DensitySmallIcon
                       className="mx-2"
@@ -279,7 +273,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                   }}
                 />
                 <Tab
-                  label=" Flowers "
+                  label={t("Flowers")}
                   icon={
                     <LocalFloristIcon
                       className="mx-2"
@@ -298,7 +292,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                   }}
                 />
                 <Tab
-                  label=" Gifts "
+                  label={t("Gifts")}
                   icon={
                     <CardGiftcardIcon
                       className="mx-2"
@@ -317,7 +311,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                   }}
                 />
                 <Tab
-                  label=" Entertainment "
+                  label={t("Entertainment")}
                   icon={
                     <CasinoIcon className="mx-2" style={{ fontSize: "2rem" }} />
                   }
@@ -333,7 +327,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                   }}
                 />
                 <Tab
-                  label=" Maintenance "
+                  label={t("Maintenance")}
                   icon={
                     <BuildIcon className="mx-2" style={{ fontSize: "2rem" }} />
                   }
@@ -349,7 +343,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                   }}
                 />
                 <Tab
-                  label=" Medicine "
+                  label={t("Medicine")}
                   icon={
                     <VaccinesIcon
                       className="mx-2"
@@ -368,7 +362,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                   }}
                 />
                 <Tab
-                  label=" Medical Equipment "
+                  label={t("Medical Equipment")}
                   icon={
                     <MonitorHeartIcon
                       className="mx-2"
@@ -392,7 +386,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                   variant="outlined"
                   onClick={handleClick}
                   sx={{
-                    color: "#009CA6",
+                    color: GetColorblindColors().color2,
                     backgroundColor: "white",
                     "&:hover": {
                       borderColor: "#f6bd38",
@@ -401,7 +395,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                     },
                   }}
                 >
-                  Filter
+                  {t("Filter")}
                 </Button>
               </Box>
 
@@ -418,11 +412,11 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                 <Box display="flex" flexDirection="column" sx={{ p: 2 }}>
                   <FormControl size="small">
                     <InputLabel id="select-service-type-label">
-                      Service Type
+                      {t("Service Type")}
                     </InputLabel>
                     <Select
                       labelId="select-service-type-label"
-                      label="Service Type"
+                      label={t("Service Type")}
                       value={filters.serviceType}
                       onChange={(e) =>
                         setFilters({
@@ -433,7 +427,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                     >
                       {availableServices.map((serviceOption: string) => (
                         <MenuItem key={serviceOption} value={serviceOption}>
-                          {serviceOption}
+                          {t(serviceOption)}
                         </MenuItem>
                       ))}
                     </Select>
@@ -441,7 +435,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                   <Box mt={1}>
                     <TextField
                       size="small"
-                      label="Name"
+                      label={t("Name")}
                       variant="outlined"
                       value={filters.name}
                       onChange={(e) =>
@@ -450,28 +444,30 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                     />
                   </Box>
                   <FormControl size="small" sx={{ marginTop: 1 }}>
-                    <InputLabel id="select-priority-label">Priority</InputLabel>
+                    <InputLabel id="select-priority-label">
+                      {t("Priority")}
+                    </InputLabel>
                     <Select
                       labelId="select-priority-label"
-                      label="Priority"
+                      label={t("Priority")}
                       value={filters.priority}
                       onChange={(e) =>
                         setFilters({ ...filters, priority: e.target.value })
                       }
                     >
-                      <MenuItem value="Low">Low</MenuItem>
-                      <MenuItem value="Medium">Medium</MenuItem>
-                      <MenuItem value="High">High</MenuItem>
-                      <MenuItem value="Emergency">Emergency</MenuItem>
+                      <MenuItem value="Low">{t("Low")}</MenuItem>
+                      <MenuItem value="Medium">{t("Medium")}</MenuItem>
+                      <MenuItem value="High">{t("High")}</MenuItem>
+                      <MenuItem value="Emergency">{t("Emergency")}</MenuItem>
                     </Select>
                   </FormControl>
                   <FormControl size="small" sx={{ marginTop: 1 }}>
                     <InputLabel id="select-priority-label">
-                      Employee ID
+                      {t("Employee")} ID
                     </InputLabel>
                     <Select
                       labelId="select-employeeID-label"
-                      label="Employee ID"
+                      label={t("Employee") + " ID"}
                       value={filters.employee}
                       onChange={(e) => {
                         setFilters({ ...filters, employee: e.target.value });
@@ -485,19 +481,21 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                     </Select>
                   </FormControl>
                   <FormControl size="small" sx={{ marginTop: 1 }}>
-                    <InputLabel id="select-status-label">Status</InputLabel>
+                    <InputLabel id="select-status-label">
+                      {t("Status")}
+                    </InputLabel>
                     <Select
                       labelId="select-status-label"
-                      label="Status"
+                      label={t("Status")}
                       value={filters.status}
                       onChange={(e) =>
                         setFilters({ ...filters, status: e.target.value })
                       }
                     >
-                      <MenuItem value="Unassigned">Unassigned</MenuItem>
-                      <MenuItem value="Assigned">Assigned</MenuItem>
-                      <MenuItem value="InProgress">InProgress</MenuItem>
-                      <MenuItem value="Closed">Closed</MenuItem>
+                      <MenuItem value="Unassigned">{t("Unassigned")}</MenuItem>
+                      <MenuItem value="Assigned">{t("Assigned")}</MenuItem>
+                      <MenuItem value="InProgress">{t("InProgress")}</MenuItem>
+                      <MenuItem value="Closed">{t("Closed")}</MenuItem>
                     </Select>
                   </FormControl>
                   <Box display="flex" gap={1} mt={1}>
@@ -514,7 +512,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                         })
                       }
                     >
-                      Reset
+                      {t("Reset")}
                     </Button>
                     <Button
                       variant="contained"
@@ -524,7 +522,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                         handleClose();
                       }}
                     >
-                      Confirm
+                      {t("Confirm")}
                     </Button>
                   </Box>
                 </Box>
@@ -543,17 +541,17 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                       color: "white",
                     }}
                   >
-                    <th className=" border-black p-2 ">Service Type</th>
-                    <th className=" border-black p-2 ">Name</th>
-                    <th className=" border-black p-2 ">Delivery Date</th>
-                    <th className=" border-black p-2 ">Room</th>
-                    <th className=" border-black p-2 ">Priority</th>
-                    <th className=" border-black p-2 ">Details 1</th>
-                    <th className=" border-black p-2 ">Details 2</th>
-                    <th className=" border-black p-2 ">Details 3</th>
-                    <th className=" border-black p-2 ">Employee</th>
-                    <th className=" border-black w-10 ">Status</th>
-                    <th className=" border-black p-2 ">Actions</th>
+                    <th className=" border-black p-2 ">{t("Service Type")}</th>
+                    <th className=" border-black p-2 ">{t("Name")}</th>
+                    <th className=" border-black p-2 ">{t("Delivery Date")}</th>
+                    <th className=" border-black p-2 ">{t("Room")}</th>
+                    <th className=" border-black p-2 ">{t("Priority")}</th>
+                    <th className=" border-black p-2 ">{t("Details")} 1</th>
+                    <th className=" border-black p-2 ">{t("Details")} 2</th>
+                    <th className=" border-black p-2 ">{t("Details")} 3</th>
+                    <th className=" border-black p-2 ">{t("Employee")}</th>
+                    <th className=" border-black w-10 ">{t("Status")}</th>
+                    <th className=" border-black p-2 ">{t("Actions")}</th>
                     {/*<th className="border border-black">Details</th>*/}
                   </tr>
                 </thead>
@@ -571,7 +569,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                           }}
                         >
                           <td className="border-black text-center p-2">
-                            {row.RequestType}
+                            {t(row.RequestType)}
                           </td>
                           <td className="border-black text-center p-2">
                             {row.RequesterName}
@@ -583,7 +581,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                             {row.LocationNodeID}
                           </td>
                           <td className="border-black text-center p-2">
-                            {row.Priority}
+                            {t(row.Priority)}
                           </td>
                           <td className="border-black text-center p-2">
                             {row.Details1}
@@ -608,7 +606,10 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                                 }}
                               >
                                 {employees.map((employee: Employee) => (
-                                  <MenuItem value={employee.userID}>
+                                  <MenuItem
+                                    key={employee.userID}
+                                    value={employee.userID}
+                                  >
                                     {employee.nickname}
                                   </MenuItem>
                                 ))}
@@ -629,13 +630,17 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                                 }}
                               >
                                 <MenuItem value="Unassigned">
-                                  Unassigned
+                                  {t("Unassigned")}
                                 </MenuItem>
-                                <MenuItem value="Assigned">Assigned</MenuItem>
+                                <MenuItem value="Assigned">
+                                  {t("Assigned")}
+                                </MenuItem>
                                 <MenuItem value="InProgress">
-                                  InProgress
+                                  {t("InProgress")}
                                 </MenuItem>
-                                <MenuItem value="Closed">Closed</MenuItem>
+                                <MenuItem value="Closed">
+                                  {t("Closed")}
+                                </MenuItem>
                               </Select>
                             </FormControl>
                           </td>
@@ -645,7 +650,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                               color="error"
                               onClick={() => deleteService(row)}
                             >
-                              Delete
+                              {t("Delete")}
                             </Button>
                           </td>
                           {/*<td className="border border-black text-center">*/}
@@ -669,17 +674,19 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                       color: "white",
                     }}
                   >
-                    <th className=" border-black p-2 ">Service Type</th>
-                    <th className=" border-black p-2 ">Name</th>
-                    <th className=" border-black p-2 ">Sub Type</th>
-                    <th className=" border-black p-2 ">Delivery Date</th>
-                    <th className=" border-black p-2 ">Room</th>
-                    <th className=" border-black p-2 ">Priority</th>
-                    <th className=" border-black p-2 ">Details</th>
-                    <th className=" border-black p-2 ">Size of Bouquet</th>
-                    <th className=" border-black p-2 ">Employee</th>
-                    <th className=" border-black w-10 ">Status</th>
-                    <th className=" border-black p-2 ">Actions</th>
+                    <th className=" border-black p-2 ">{t("Service Type")}</th>
+                    <th className=" border-black p-2 ">{t("Name")}</th>
+                    <th className=" border-black p-2 ">{t("Sub Type")}</th>
+                    <th className=" border-black p-2 ">{t("Delivery Date")}</th>
+                    <th className=" border-black p-2 ">{t("Room")}</th>
+                    <th className=" border-black p-2 ">{t("Priority")}</th>
+                    <th className=" border-black p-2 ">{t("Details")}</th>
+                    <th className=" border-black p-2 ">
+                      {t("Size of Bouquet")}
+                    </th>
+                    <th className=" border-black p-2 ">{t("Employee")}</th>
+                    <th className=" border-black w-10 ">{t("Status")}</th>
+                    <th className=" border-black p-2 ">{t("Actions")}</th>
                     {/*<th className="border border-black">Details</th>*/}
                   </tr>
                 </thead>
@@ -697,7 +704,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                           }}
                         >
                           <td className="border-black text-center p-2">
-                            {row.RequestType}
+                            {t(row.RequestType)}
                           </td>
                           <td className="border-black text-center p-2">
                             {row.RequesterName}
@@ -712,13 +719,13 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                             {row.LocationNodeID}
                           </td>
                           <td className="border-black text-center p-2">
-                            {row.Priority}
+                            {t(row.Priority)}
                           </td>
                           <td className="border-black text-center p-2">
                             {row.Details1}
                           </td>
                           <td className="border-black text-center p-2">
-                            {row.Details2}
+                            {t(row.Details2)}
                           </td>
                           <td className="border-black text-center p-2">
                             <FormControl fullWidth>
@@ -755,13 +762,17 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                                 }}
                               >
                                 <MenuItem value="Unassigned">
-                                  Unassigned
+                                  {t("Unassigned")}
                                 </MenuItem>
-                                <MenuItem value="Assigned">Assigned</MenuItem>
+                                <MenuItem value="Assigned">
+                                  {t("Assigned")}
+                                </MenuItem>
                                 <MenuItem value="InProgress">
-                                  InProgress
+                                  {t("InProgress")}
                                 </MenuItem>
-                                <MenuItem value="Closed">Closed</MenuItem>
+                                <MenuItem value="Closed">
+                                  {t("Closed")}
+                                </MenuItem>
                               </Select>
                             </FormControl>
                           </td>
@@ -771,7 +782,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                               color="error"
                               onClick={() => deleteService(row)}
                             >
-                              Delete
+                              {t("Delete")}
                             </Button>
                           </td>
                           {/*<td className="border border-black text-center">*/}
@@ -794,17 +805,17 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                       color: "white",
                     }}
                   >
-                    <th className=" border-black p-2 ">Service Type</th>
-                    <th className=" border-black p-2 ">Name</th>
-                    <th className=" border-black p-2 ">Sub Type</th>
-                    <th className=" border-black p-2 ">Delivery Date</th>
-                    <th className=" border-black p-2 ">Room</th>
-                    <th className=" border-black p-2 ">Priority</th>
-                    <th className=" border-black p-2 ">Message</th>
-                    <th className=" border-black p-2 ">Wrapped</th>
-                    <th className=" border-black p-2 ">Employee</th>
-                    <th className=" border-black p-2 ">Status</th>
-                    <th className=" border-black p-2 ">Actions</th>
+                    <th className=" border-black p-2 ">{t("Service Type")}</th>
+                    <th className=" border-black p-2 ">{t("Name")}</th>
+                    <th className=" border-black p-2 ">{t("Sub Type")}</th>
+                    <th className=" border-black p-2 ">{t("Delivery Date")}</th>
+                    <th className=" border-black p-2 ">{t("Room")}</th>
+                    <th className=" border-black p-2 ">{t("Priority")}</th>
+                    <th className=" border-black p-2 ">{t("Message")}</th>
+                    <th className=" border-black p-2 ">{t("Wrapped")}</th>
+                    <th className=" border-black p-2 ">{t("Employee")}</th>
+                    <th className=" border-black p-2 ">{t("Status")}</th>
+                    <th className=" border-black p-2 ">{t("Actions")}</th>
                     {/*<th className="border border-black">Details</th>*/}
                   </tr>
                 </thead>
@@ -822,7 +833,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                           }}
                         >
                           <td className="border-black text-center p-2">
-                            {row.RequestType}
+                            {t(row.RequestType)}
                           </td>
                           <td className="border-black text-center p-2">
                             {row.RequesterName}
@@ -837,7 +848,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                             {row.LocationNodeID}
                           </td>
                           <td className="border-black text-center p-2">
-                            {row.Priority}
+                            {t(row.Priority)}
                           </td>
                           <td className="border-black text-center p-2">
                             {row.Details1}
@@ -880,13 +891,17 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                                 }}
                               >
                                 <MenuItem value="Unassigned">
-                                  Unassigned
+                                  {t("Unassigned")}
                                 </MenuItem>
-                                <MenuItem value="Assigned">Assigned</MenuItem>
+                                <MenuItem value="Assigned">
+                                  {t("Assigned")}
+                                </MenuItem>
                                 <MenuItem value="InProgress">
-                                  InProgress
+                                  {t("InProgress")}
                                 </MenuItem>
-                                <MenuItem value="Closed">Closed</MenuItem>
+                                <MenuItem value="Closed">
+                                  {t("Closed")}
+                                </MenuItem>
                               </Select>
                             </FormControl>
                           </td>
@@ -896,7 +911,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                               color="error"
                               onClick={() => deleteService(row)}
                             >
-                              Delete
+                              {t("Delete")}
                             </Button>
                           </td>
                           {/*<td className="border border-black text-center">*/}
@@ -919,19 +934,19 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                       color: "white",
                     }}
                   >
-                    <th className=" border-black p-2 ">Service Type</th>
-                    <th className=" border-black p-2 ">Name</th>
-                    <th className=" border-black p-2 ">Delivery Date</th>
-                    <th className=" border-black p-2 ">Room</th>
-                    <th className=" border-black p-2 ">Priority</th>
-                    <th className=" border-black p-2 ">Details</th>
+                    <th className=" border-black p-2 ">{t("Service Type")}</th>
+                    <th className=" border-black p-2 ">{t("Name")}</th>
+                    <th className=" border-black p-2 ">{t("Delivery Date")}</th>
+                    <th className=" border-black p-2 ">{t("Room")}</th>
+                    <th className=" border-black p-2 ">{t("Priority")}</th>
+                    <th className=" border-black p-2 ">{t("Details")}</th>
                     <th className=" border-black p-2 ">
-                      Type of Entertainment
+                      {t("Type of Entertainment")}
                     </th>
                     <th className=" border-black p-2 ">13+</th>
-                    <th className=" border-black p-2 ">Employee</th>
-                    <th className=" border-black p-2 ">Status</th>
-                    <th className=" border-black p-2 ">Actions</th>
+                    <th className=" border-black p-2 ">{t("Employee")}</th>
+                    <th className=" border-black p-2 ">{t("Status")}</th>
+                    <th className=" border-black p-2 ">{t("Actions")}</th>
                     {/*<th className="border border-black">Details</th>*/}
                   </tr>
                 </thead>
@@ -949,7 +964,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                           }}
                         >
                           <td className="border-black text-center p-2">
-                            {row.RequestType}
+                            {t(row.RequestType)}
                           </td>
                           <td className="border-black text-center p-2">
                             {row.RequesterName}
@@ -961,7 +976,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                             {row.LocationNodeID}
                           </td>
                           <td className="border-black text-center p-2">
-                            {row.Priority}
+                            {t(row.Priority)}
                           </td>
                           <td className="border-black text-center p-2">
                             {row.Details1}
@@ -1007,13 +1022,17 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                                 }}
                               >
                                 <MenuItem value="Unassigned">
-                                  Unassigned
+                                  {t("Unassigned")}
                                 </MenuItem>
-                                <MenuItem value="Assigned">Assigned</MenuItem>
+                                <MenuItem value="Assigned">
+                                  {t("Assigned")}
+                                </MenuItem>
                                 <MenuItem value="InProgress">
-                                  InProgress
+                                  {t("InProgress")}
                                 </MenuItem>
-                                <MenuItem value="Closed">Closed</MenuItem>
+                                <MenuItem value="Closed">
+                                  {t("Closed")}
+                                </MenuItem>
                               </Select>
                             </FormControl>
                           </td>
@@ -1023,7 +1042,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                               color="error"
                               onClick={() => deleteService(row)}
                             >
-                              Delete
+                              {t("Delete")}
                             </Button>
                           </td>
                           {/*<td className="border border-black text-center">*/}
@@ -1046,17 +1065,21 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                       color: "white",
                     }}
                   >
-                    <th className=" border-black p-2 ">Service Type</th>
-                    <th className=" border-black p-2 ">Name</th>
-                    <th className=" border-black p-2 ">Delivery Date</th>
-                    <th className=" border-black p-2 ">Room</th>
-                    <th className=" border-black p-2 ">Priority</th>
-                    <th className=" border-black p-2 ">Details</th>
-                    <th className=" border-black p-2 ">Type of maintenance</th>
-                    <th className=" border-black p-2 ">Hazardous Material</th>
-                    <th className=" border-black p-2 ">Employee</th>
-                    <th className=" border-black p-2 ">Status</th>
-                    <th className=" border-black p-2 ">Actions</th>
+                    <th className=" border-black p-2 ">{t("Service Type")}</th>
+                    <th className=" border-black p-2 ">{t("Name")}</th>
+                    <th className=" border-black p-2 ">{t("Delivery Date")}</th>
+                    <th className=" border-black p-2 ">{t("Room")}</th>
+                    <th className=" border-black p-2 ">{t("Priority")}</th>
+                    <th className=" border-black p-2 ">{t("Details")}</th>
+                    <th className=" border-black p-2 ">
+                      {t("Type of maintenance")}
+                    </th>
+                    <th className=" border-black p-2 ">
+                      {t("Hazardous Material")}
+                    </th>
+                    <th className=" border-black p-2 ">{t("Employee")}</th>
+                    <th className=" border-black p-2 ">{t("Status")}</th>
+                    <th className=" border-black p-2 ">{t("Actions")}</th>
                     {/*<th className="border border-black">Details</th>*/}
                   </tr>
                 </thead>
@@ -1074,7 +1097,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                           }}
                         >
                           <td className="border-black text-center p-2">
-                            {row.RequestType}
+                            {t(row.RequestType)}
                           </td>
                           <td className="border-black text-center p-2">
                             {row.RequesterName}
@@ -1086,7 +1109,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                             {row.LocationNodeID}
                           </td>
                           <td className="border-black text-center p-2">
-                            {row.Priority}
+                            {t(row.Priority)}
                           </td>
                           <td className="border-black text-center p-2">
                             {row.Details1}
@@ -1132,13 +1155,17 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                                 }}
                               >
                                 <MenuItem value="Unassigned">
-                                  Unassigned
+                                  {t("Unassigned")}
                                 </MenuItem>
-                                <MenuItem value="Assigned">Assigned</MenuItem>
+                                <MenuItem value="Assigned">
+                                  {t("Assigned")}
+                                </MenuItem>
                                 <MenuItem value="InProgress">
-                                  InProgress
+                                  {t("InProgress")}
                                 </MenuItem>
-                                <MenuItem value="Closed">Closed</MenuItem>
+                                <MenuItem value="Closed">
+                                  {t("Closed")}
+                                </MenuItem>
                               </Select>
                             </FormControl>
                           </td>
@@ -1148,7 +1175,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                               color="error"
                               onClick={() => deleteService(row)}
                             >
-                              Delete
+                              {t("Delete")}
                             </Button>
                           </td>
                           {/*<td className="border border-black text-center">*/}
@@ -1171,17 +1198,17 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                       color: "white",
                     }}
                   >
-                    <th className="  border-black p-2">Service Type</th>
-                    <th className="  border-black p-2">Name</th>
-                    <th className="  border-black p-2">Delivery Date</th>
-                    <th className="  border-black p-2">Room</th>
-                    <th className="  border-black p-2">Priority</th>
-                    <th className="  border-black p-2">Details</th>
-                    <th className="  border-black p-2">Dosage</th>
-                    <th className="  border-black p-2">Route</th>
-                    <th className=" border-black p-2 ">Employee</th>
-                    <th className="  border-black p-2">Status</th>
-                    <th className="  border-black p-2">Actions</th>
+                    <th className="  border-black p-2">{t("Service Type")}</th>
+                    <th className="  border-black p-2">{t("Name")}</th>
+                    <th className="  border-black p-2">{t("Delivery Date")}</th>
+                    <th className="  border-black p-2">{t("Room")}</th>
+                    <th className="  border-black p-2">{t("Priority")}</th>
+                    <th className="  border-black p-2">{t("Details")}</th>
+                    <th className="  border-black p-2">{t("Dosage")}</th>
+                    <th className="  border-black p-2">{t("Route")}</th>
+                    <th className=" border-black p-2 ">{t("Employee")}</th>
+                    <th className="  border-black p-2">{t("Status")}</th>
+                    <th className="  border-black p-2">{t("Actions")}</th>
                     {/*<th className="border border-black">Details</th>*/}
                   </tr>
                 </thead>
@@ -1199,7 +1226,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                           }}
                         >
                           <td className="border-black text-center p-2">
-                            {row.RequestType}
+                            {t(row.RequestType)}
                           </td>
                           <td className="border-black text-center p-2">
                             {row.RequesterName}
@@ -1211,7 +1238,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                             {row.LocationNodeID}
                           </td>
                           <td className="border-black text-center p-2">
-                            {row.Priority}
+                            {t(row.Priority)}
                           </td>
                           <td className="border-black text-center p-2">
                             {row.Details1}
@@ -1257,13 +1284,17 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                                 }}
                               >
                                 <MenuItem value="Unassigned">
-                                  Unassigned
+                                  {t("Unassigned")}
                                 </MenuItem>
-                                <MenuItem value="Assigned">Assigned</MenuItem>
+                                <MenuItem value="Assigned">
+                                  {t("Assigned")}
+                                </MenuItem>
                                 <MenuItem value="InProgress">
-                                  InProgress
+                                  {t("InProgress")}
                                 </MenuItem>
-                                <MenuItem value="Closed">Closed</MenuItem>
+                                <MenuItem value="Closed">
+                                  {t("Closed")}
+                                </MenuItem>
                               </Select>
                             </FormControl>
                           </td>
@@ -1273,7 +1304,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                               color="error"
                               onClick={() => deleteService(row)}
                             >
-                              Delete
+                              {t("Delete")}
                             </Button>
                           </td>
                           {/*<td className="border border-black text-center">*/}
@@ -1296,17 +1327,19 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                       color: "white",
                     }}
                   >
-                    <th className="  border-black p-2">Service Type</th>
-                    <th className="  border-black p-2">Name</th>
-                    <th className="  border-black p-2">Delivery Date</th>
-                    <th className="  border-black p-2">Room</th>
-                    <th className="  border-black p-2">Priority</th>
-                    <th className="  border-black p-2">Details</th>
-                    <th className="  border-black p-2">Quantity</th>
-                    <th className="  border-black p-2">Requires Supervision</th>
-                    <th className=" border-black p-2 ">Employee</th>
-                    <th className="  border-black p-2">Status</th>
-                    <th className="  border-black p-2">Actions</th>
+                    <th className="  border-black p-2">{t("Service Type")}</th>
+                    <th className="  border-black p-2">{t("Name")}</th>
+                    <th className="  border-black p-2">{t("Delivery Date")}</th>
+                    <th className="  border-black p-2">{t("Room")}</th>
+                    <th className="  border-black p-2">{t("Priority")}</th>
+                    <th className="  border-black p-2">{t("Details")}</th>
+                    <th className="  border-black p-2">{t("Quantity")}</th>
+                    <th className="  border-black p-2">
+                      {t("Requires Supervision")}
+                    </th>
+                    <th className=" border-black p-2 ">{t("Employee")}</th>
+                    <th className="  border-black p-2">{t("Status")}</th>
+                    <th className="  border-black p-2">{t("Actions")}</th>
                     {/*<th className="border border-black">Details</th>*/}
                   </tr>
                 </thead>
@@ -1324,7 +1357,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                           }}
                         >
                           <td className="border-black text-center p-2">
-                            {row.RequestType}
+                            {t(row.RequestType)}
                           </td>
                           <td className="border-black text-center p-2">
                             {row.RequesterName}
@@ -1336,7 +1369,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                             {row.LocationNodeID}
                           </td>
                           <td className="border-black text-center p-2">
-                            {row.Priority}
+                            {t(row.Priority)}
                           </td>
                           <td className="border-black text-center p-2">
                             {row.Details1}
@@ -1382,13 +1415,17 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                                 }}
                               >
                                 <MenuItem value="Unassigned">
-                                  Unassigned
+                                  {t("Unassigned")}
                                 </MenuItem>
-                                <MenuItem value="Assigned">Assigned</MenuItem>
+                                <MenuItem value="Assigned">
+                                  {t("Assigned")}
+                                </MenuItem>
                                 <MenuItem value="InProgress">
-                                  InProgress
+                                  {t("InProgress")}
                                 </MenuItem>
-                                <MenuItem value="Closed">Closed</MenuItem>
+                                <MenuItem value="Closed">
+                                  {t("Closed")}
+                                </MenuItem>
                               </Select>
                             </FormControl>
                           </td>
@@ -1398,7 +1435,7 @@ function ServiceRequestTable({ availableServices }: ListOfServices) {
                               color="error"
                               onClick={() => deleteService(row)}
                             >
-                              Delete
+                              {t("Delete")}
                             </Button>
                           </td>
                           {/*<td className="border border-black text-center">*/}

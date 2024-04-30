@@ -4,12 +4,16 @@ import { PrismaClient, Nodes } from "database";
 import { algoType, findpath } from "../findpath.ts";
 import { Directions } from "../findDirections.ts";
 
+interface EdgeWeight {
+  edgeID: string;
+  weight: number;
+}
 const prisma = new PrismaClient();
 
 const router: Router = express.Router();
 
 // Return the shortest path when called. Defaults to A*
-router.get(
+router.post(
   "/:algoType",
   async function (req: Request, res: Response): Promise<void> {
     const { startNodeID, endNodeID } = req.query as {
@@ -43,6 +47,21 @@ router.get(
     }
 
     const graph = await createGraph();
+    let parsedEdgeWeights: EdgeWeight[] | undefined;
+    if (req.body.edgeWeights) {
+      try {
+        parsedEdgeWeights = req.body.edgeWeights;
+        console.log("here rn", parsedEdgeWeights);
+        parsedEdgeWeights!.forEach((edgeWeight) => {
+          graph.addEdgeWeight(edgeWeight.edgeID, edgeWeight.weight);
+        });
+      } catch (error) {
+        res.status(400).send("Invalid edgeWeights format");
+        return;
+      }
+    }
+
+    console.log("here 2", graph);
 
     //const path: string[] = graph.AStar(startNodeID, endNodeID);
     const pathDirections: string[] = findpath.doAlgo(
@@ -81,13 +100,13 @@ router.get(
   },
 );
 
-async function createGraph(): Promise<Graph> {
+export async function createGraph(): Promise<Graph> {
   const floorToZMap = new Map<string, number>();
-  floorToZMap.set("L1", -100);
   floorToZMap.set("L2", -200);
-  floorToZMap.set("1", 100);
-  floorToZMap.set("2", 200);
-  floorToZMap.set("3", 300);
+  floorToZMap.set("L1", 0);
+  floorToZMap.set("1", 200);
+  floorToZMap.set("2", 400);
+  floorToZMap.set("3", 600);
 
   // Initialize the graph
   const graph = new Graph();
@@ -98,12 +117,23 @@ async function createGraph(): Promise<Graph> {
 
   // Add nodes to graph
   for (const node of nodes) {
-    graph.addNode(
-      node.NodeID,
-      +node.Xcoord,
-      +node.Ycoord,
-      floorToZMap.get(node.Floor)!,
-    );
+    if (node.NodeType == "STAI") {
+      graph.addStairNode(
+        node.NodeID,
+        node.LongName,
+        +node.Xcoord,
+        +node.Ycoord,
+        floorToZMap.get(node.Floor)!,
+      );
+    } else {
+      graph.addNode(
+        node.NodeID,
+        node.LongName,
+        +node.Xcoord,
+        +node.Ycoord,
+        floorToZMap.get(node.Floor)!,
+      );
+    }
   }
 
   // Add edges to graph

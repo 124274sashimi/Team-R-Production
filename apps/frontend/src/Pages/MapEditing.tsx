@@ -1,6 +1,5 @@
 //This is the main page with the map, staff sign in, etc on the first slide in Figma.
 
-import SideBar from "../components/SideBar.tsx";
 import React, { useState, useEffect, ChangeEvent } from "react";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import SVGCanvas from "../components/SVGCanvas.tsx";
@@ -12,8 +11,10 @@ import { CreateNodeDB } from "../backendreference/CreateNode.tsx";
 import { CreateEdgeDB } from "../backendreference/CreateEdge.tsx";
 import { EdgesCustomHook } from "../components/SVGCanvas.tsx";
 import { FloorSelect, MapControls } from "../components/MapUtils.tsx";
-import { defaultMap, floors } from "../components/mapElements.ts";
+import { defaultFloor } from "../components/mapElements.ts";
 
+import DoneIcon from "@mui/icons-material/Done";
+import { useTranslation } from "react-i18next";
 //import Table Items
 import Table from "@mui/material/Table";
 // import TableBody from '@mui/material/TableBody';
@@ -21,11 +22,18 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 // import TableHead from '@mui/material/TableHead';
 import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
 import Autocomplete from "@mui/material/Autocomplete";
 import { appTheme } from "../Interfaces/MuiTheme.ts";
 import { ThemeProvider } from "@mui/material";
-import { rightSideBarStyle } from "../styles/RightSideBarStyle.ts";
+import { editMapRightSideBar } from "../styles/editMapRightSideBar.ts";
+import SpeedDial from "@mui/material/SpeedDial";
+import SpeedDialAction from "@mui/material/SpeedDialAction";
+import SpeedDialIcon from "@mui/material/SpeedDialIcon";
+import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
+import LinearScaleIcon from "@mui/icons-material/LinearScale";
+import { GetColorblindColors } from "../components/colorblind.ts";
+import { useNavigate } from "react-router-dom";
+//import {c} from "vitest/dist/reporters-5f784f42";
 
 let edgeFlag = false;
 
@@ -44,7 +52,7 @@ export default function MapEditing() {
       },
     }).then();
   }
-
+  const { t } = useTranslation();
   const defaultNode: Nodes = {
     NodeID: "",
     Xcoord: "",
@@ -64,7 +72,7 @@ export default function MapEditing() {
 
   const [nodesData, setNodesData] = useState<Nodes[]>([]);
   const { edgesData, setEdgesData } = EdgesCustomHook();
-  const [currentMap, setCurrentMap] = useState(defaultMap);
+  const [currentFloor, setCurrentFloor] = useState(defaultFloor);
   const [nodeClicked, setNodeClicked] = useState<Nodes>();
   const [edgeClicked, setEdgeClicked] = useState<Edges>();
   const [editableEdge, setEditableEdge] = useState<Edges | undefined>();
@@ -78,13 +86,29 @@ export default function MapEditing() {
   const [addNodeFormFlag, setAddNodeFormFlag] = useState<boolean>(false);
   const [addNodeID, setAddNodeID] = useState<string>("");
   const [edgeLock, setEdgeLock] = useState<boolean>();
+  const [clickTimes, setClickTimes] = useState<number>(1);
 
   // handles nodeClicked and editableNode useState whenever node is clicked
-  const handleNodeClick = (node: Nodes | undefined) => {
-    setEdgeLock(false);
-    setNodeClicked(node);
-    if (node) {
-      setEditableNode({ ...node }); // Handles clicked node and sets it as editable
+  const handleNodeClick = (node: Nodes | undefined, isMouseClick: boolean) => {
+    if (addEdgeFormFlag) {
+      if (clickTimes % 2 === 1) {
+        //setStart(node ? node.LongName : "");
+        setAddEdgeStartID(node ? node.NodeID : "");
+        console.log("Test1: " + clickTimes);
+      } else {
+        setAddEdgeEndID(node ? node.NodeID : "");
+        console.log("Test2: " + clickTimes);
+      }
+
+      if (isMouseClick) {
+        setClickTimes((prevClickTimes) => prevClickTimes + 1);
+      }
+    } else {
+      setEdgeLock(false);
+      setNodeClicked(node);
+      if (node) {
+        setEditableNode({ ...node }); // Handles clicked node and sets it as editable
+      }
     }
   };
 
@@ -167,7 +191,7 @@ export default function MapEditing() {
 
     //Add a new node to databsae!
     const newNode = defaultNode;
-    newNode.Floor = floors.find((floor) => floor.map === currentMap)!.level;
+    newNode.Floor = currentFloor.level;
     newNode.NodeID = addNodeID;
     newNode.ShortName = newNode.NodeID + "-ShortName";
     newNode.LongName = newNode.NodeID + "-LongName";
@@ -176,7 +200,7 @@ export default function MapEditing() {
     await CreateNodeDB(newNode, token);
 
     //Set new node
-    handleNodeClick(newNode);
+    handleNodeClick(newNode, false);
 
     //Refresh nodes data
     const updatedNodes: Nodes[] = nodesData;
@@ -227,32 +251,61 @@ export default function MapEditing() {
     });
   };
 
+  const [open, setOpen] = React.useState(false);
+
+  const navigate = useNavigate();
+  const routeChange = (path: string) => {
+    const newPath = `/${path}`;
+    navigate(newPath);
+  };
+
+  const actions = [
+    {
+      icon: <ScatterPlotIcon style={{ color: "white" }} />,
+      name: "Add Node",
+      onClick: () => {
+        setNodeClicked(undefined);
+        setEdgeClicked(undefined);
+        setAddEdgeFormFlag(false);
+        setAddNodeID("");
+        setAddNodeFormFlag(true);
+      },
+    },
+    {
+      icon: <LinearScaleIcon style={{ color: "white" }} />,
+      name: "Add Edge",
+      onClick: () => {
+        setNodeClicked(undefined);
+        setEdgeClicked(undefined);
+        setAddNodeFormFlag(false);
+        setAddEdgeID("");
+        setAddEdgeStartID("");
+        setAddEdgeEndID("");
+        setAddEdgeFormFlag(true);
+      },
+    },
+  ];
+
   return (
     <div
       id="MainPage"
       className="flex h-screen overflow-hidden flex-row bg-[#d6d8d5]"
     >
-      <SideBar />
       <main className="flex content-center justify-center leading-none relative">
         <TransformWrapper alignmentAnimation={{ sizeX: 0, sizeY: 0 }}>
           {({ zoomIn, zoomOut, resetTransform }) => (
             <section>
               <TransformComponent>
                 <SVGCanvas
-                  key={currentMap}
-                  currentMap={currentMap}
+                  currentFloor={currentFloor}
                   resetMapTransform={resetTransform}
                   newEdgeFlag={edgeFlag}
-                  currentLevel={
-                    floors.find((floor) => floor.map === currentMap)?.level ||
-                    ""
-                  }
                   handleNodeClicked={handleNodeClick}
                   nodeClicked={nodeClicked}
                   handleEdgeClicked={handleEdgeClicked}
                   edgeClicked={edgeClicked}
-                  nodeColor={"orange"}
-                  edgeColor={"green"}
+                  nodeColor={GetColorblindColors().color9}
+                  edgeColor={GetColorblindColors().color10}
                   isHome={false}
                   showPathOnly={false}
                   allnodes={nodesData}
@@ -265,8 +318,34 @@ export default function MapEditing() {
                   zoomOut={zoomOut}
                   resetTransform={resetTransform}
                 />
+                <SpeedDial
+                  ariaLabel="SpeedDial openIcon example"
+                  open={open}
+                  icon={<SpeedDialIcon />}
+                  onClick={() => setOpen(!open)}
+                  direction="down"
+                  className="absolute top-20 left-1 flex gap-1"
+                  sx={{
+                    "& .MuiFab-root": {
+                      backgroundColor: GetColorblindColors().color2,
+                      "&:hover": {
+                        backgroundColor: GetColorblindColors().color4,
+                      },
+                    },
+                  }}
+                >
+                  {actions.map((action) => (
+                    <SpeedDialAction
+                      key={action.name}
+                      icon={action.icon}
+                      tooltipTitle={action.name}
+                      tooltipPlacement="right"
+                      onClick={action.onClick}
+                    />
+                  ))}
+                </SpeedDial>
                 <FloorSelect
-                  setMap={setCurrentMap}
+                  setFloor={setCurrentFloor}
                   isDirectionsClicked={isDirectionsClicked}
                   path={path}
                   resetMapTransform={resetTransform}
@@ -276,188 +355,140 @@ export default function MapEditing() {
           )}
         </TransformWrapper>
       </main>
-      <aside className={rightSideBarStyle}>
-        <Stack direction="row" spacing={5} justifyContent="center">
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            minHeight="5vh"
-            pt="3"
-          >
-            <Button
-              variant="outlined"
-              sx={{
-                color: "white",
-                borderColor: "white",
-                "&:hover": {
-                  borderColor: "#f6bd38",
-                  color: "#f6bd38",
-                },
-              }}
-              onClick={() => {
-                setNodeClicked(undefined);
-                setEdgeClicked(undefined);
-                setAddEdgeFormFlag(false);
-                setAddNodeID("");
-                setAddNodeFormFlag(true);
-              }}
-            >
-              Add Node
-            </Button>
-          </Box>
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            minHeight="5vh"
-            pt="3"
-          >
-            <Button
-              variant="outlined"
-              sx={{
-                color: "white",
-                borderColor: "white",
-                "&:hover": {
-                  borderColor: "#f6bd38",
-                  color: "#f6bd38",
-                },
-              }}
-              onClick={() => {
-                setNodeClicked(undefined);
-                setEdgeClicked(undefined);
-                setAddNodeFormFlag(false);
-                setAddEdgeID("");
-                setAddEdgeStartID("");
-                setAddEdgeEndID("");
-                setAddEdgeFormFlag(true);
-              }}
-            >
-              Add Edge
-            </Button>
-          </Box>
-        </Stack>
+      <aside className={editMapRightSideBar}>
         {addEdgeFormFlag &&
           nodeClicked == undefined &&
           edgeClicked == undefined && (
-            <div>
-              <TableContainer component={Paper} sx={{ marginBottom: 2 }}>
-                <Table sx={{ maxWidth: 350 }} aria-label="simple table">
-                  <TableRow>
-                    <TableCell align="left">Enter Edge ID:</TableCell>
-                    <TableCell align="left">
-                      <TextField
-                        id="outlined-controlled"
-                        label="Edge ID"
-                        value={addEdgeID}
-                        onChange={(
-                          event: React.ChangeEvent<HTMLInputElement>,
-                        ) => {
-                          setAddEdgeID(event.target.value);
-                        }}
-                      />
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell align="left">Enter Start Node:</TableCell>
-                    <TableCell align="left">
-                      <Autocomplete
-                        value={addEdgeStartID}
-                        onChange={(
-                          e: ChangeEvent<unknown>,
-                          getStartID: string | null,
-                        ) => {
-                          setAddEdgeStartID(getStartID!);
-                        }}
-                        disablePortal
-                        id="combo-box-end"
-                        options={nodesData.map((node: Nodes) => node.NodeID)}
-                        renderInput={(params) => (
-                          <TextField {...params} label="Start Node ID" />
-                        )}
-                      />
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell align="left">Enter End Node:</TableCell>
-                    <TableCell align="left">
-                      <Autocomplete
-                        value={addEdgeEndID}
-                        onChange={(
-                          e: ChangeEvent<unknown>,
-                          getEndID: string | null,
-                        ) => {
-                          setAddEdgeEndID(getEndID!);
-                        }}
-                        disablePortal
-                        id="combo-box-end"
-                        options={nodesData.map((node: Nodes) => node.NodeID)}
-                        renderInput={(params) => (
-                          <TextField {...params} label="End Node ID" />
-                        )}
-                      />
-                    </TableCell>
-                  </TableRow>
-                </Table>
-              </TableContainer>
-              <Stack direction="row" spacing={5} justifyContent="center">
-                <Box
-                  display="flex"
+            <div
+              className={`backdrop-blur-sm bg-secondary 
+                            border-[5px_solid_${GetColorblindColors().color4}] 
+                            text-black b-radius-[3%]`}
+            >
+              <div>
+                <TableContainer sx={{ marginBottom: 2 }}>
+                  <Table sx={{ maxWidth: 350 }} aria-label="simple table">
+                    <TableRow>
+                      <TableCell align="left">
+                        <TextField
+                          className="w-full"
+                          id="outlined-controlled"
+                          label="Edge ID"
+                          value={addEdgeID}
+                          onChange={(
+                            event: React.ChangeEvent<HTMLInputElement>,
+                          ) => {
+                            setAddEdgeID(event.target.value);
+                          }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell align="left">
+                        <Autocomplete
+                          value={addEdgeStartID}
+                          onChange={(
+                            e: ChangeEvent<unknown>,
+                            getStartID: string | null,
+                          ) => {
+                            setAddEdgeStartID(getStartID!);
+                          }}
+                          disablePortal
+                          id="combo-box-end"
+                          options={nodesData.map((node: Nodes) => node.NodeID)}
+                          renderInput={(params) => (
+                            <TextField {...params} label="Start Node ID" />
+                          )}
+                        />
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell align="left">
+                        <Autocomplete
+                          value={addEdgeEndID}
+                          onChange={(
+                            e: ChangeEvent<unknown>,
+                            getEndID: string | null,
+                          ) => {
+                            setAddEdgeEndID(getEndID!);
+                          }}
+                          disablePortal
+                          id="combo-box-end"
+                          options={nodesData.map((node: Nodes) => node.NodeID)}
+                          renderInput={(params) => (
+                            <TextField {...params} label="End Node ID" />
+                          )}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  </Table>
+                </TableContainer>
+                <Stack
+                  direction="row"
+                  spacing={5}
                   justifyContent="center"
-                  alignItems="center"
-                  minHeight="5vh"
-                  pt="3"
+                  className="pb-3"
                 >
-                  <Button
-                    variant="outlined"
-                    sx={{
-                      color: "white",
-                      borderColor: "white",
-                      "&:hover": {
-                        borderColor: "#f6bd38",
-                        color: "#f6bd38",
-                      },
-                    }}
-                    onClick={() => {
-                      addEdgeDB().then();
-                      edgeFlag = false;
-                      setAddEdgeFormFlag(false);
-                      setEdgeLock(true);
-                    }}
+                  <Box
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    minHeight="5vh"
+                    pt="3"
                   >
-                    Add To Map
-                  </Button>
-                </Box>
-                <Box
-                  display="flex"
-                  justifyContent="center"
-                  alignItems="center"
-                  minHeight="5vh"
-                  pt="3"
-                >
-                  <Button
-                    variant="contained"
-                    color="error"
-                    onClick={() => {
-                      setAddEdgeFormFlag(false);
-                    }}
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: GetColorblindColors().color3,
+                        color: "white",
+                      }}
+                      onClick={() => {
+                        addEdgeDB().then();
+                        edgeFlag = false;
+                        setAddEdgeFormFlag(false);
+                        setEdgeLock(true);
+                      }}
+                    >
+                      Add Edge
+                    </Button>
+                  </Box>
+                  <Box
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    minHeight="5vh"
+                    pt="3"
                   >
-                    Cancel
-                  </Button>
-                </Box>
-              </Stack>
+                    <Button
+                      variant="contained"
+                      style={{
+                        backgroundColor: GetColorblindColors().color4,
+                        color: "white",
+                      }}
+                      onClick={() => {
+                        setAddEdgeFormFlag(false);
+                      }}
+                    >
+                      CANCEL
+                    </Button>
+                  </Box>
+                </Stack>
+              </div>
             </div>
           )}
         {addNodeFormFlag &&
           nodeClicked == undefined &&
           edgeClicked == undefined && (
-            <div>
-              <TableContainer component={Paper} sx={{ marginBottom: 2 }}>
+            <div
+              className={`backdrop-blur-sm bg-secondary 
+                            border-[5px_solid_${GetColorblindColors().color4}] 
+                            text-black b-radius-[3%]`}
+            >
+              <TableContainer sx={{ marginBottom: 2 }}>
                 <Table sx={{ maxWidth: 350 }} aria-label="simple table">
                   <TableRow>
-                    <TableCell align="left">Enter Node ID:</TableCell>
                     <TableCell align="left">
                       <TextField
+                        className="w-full"
                         id="outlined-controlled"
                         label="Node ID"
                         value={addNodeID}
@@ -471,23 +502,23 @@ export default function MapEditing() {
                   </TableRow>
                 </Table>
               </TableContainer>
-              <Stack direction="row" spacing={5} justifyContent="center">
+              <Stack
+                direction="row"
+                spacing={5}
+                justifyContent="center"
+                className="pb-3"
+              >
                 <Box
                   display="flex"
                   justifyContent="center"
                   alignItems="center"
                   minHeight="5vh"
-                  pt="3"
                 >
                   <Button
-                    variant="outlined"
+                    variant="contained"
                     sx={{
+                      backgroundColor: GetColorblindColors().color3,
                       color: "white",
-                      borderColor: "white",
-                      "&:hover": {
-                        borderColor: "#f6bd38",
-                        color: "#f6bd38",
-                      },
                     }}
                     onClick={() => {
                       addNodeDB().then();
@@ -495,7 +526,7 @@ export default function MapEditing() {
                       setAddNodeFormFlag(false);
                     }}
                   >
-                    Add To Map
+                    Add Node
                   </Button>
                 </Box>
                 <Box
@@ -503,27 +534,30 @@ export default function MapEditing() {
                   justifyContent="center"
                   alignItems="center"
                   minHeight="5vh"
-                  pt="3"
                 >
                   <Button
                     variant="contained"
-                    color="error"
+                    style={{
+                      backgroundColor: GetColorblindColors().color4,
+                      color: "white",
+                    }}
                     onClick={() => {
                       setAddNodeFormFlag(false);
                     }}
                   >
-                    Cancel
+                    CANCEL
                   </Button>
                 </Box>
               </Stack>
             </div>
           )}
         {nodeClicked != undefined && nodeClicked != defaultNode && (
-          <div className={"items- "}>
-            <TableContainer
-              sx={{ maxWidth: 350, marginBottom: 2 }}
-              component={Paper}
-            >
+          <div
+            className={`backdrop-blur-sm bg-secondary 
+                            border-[5px_solid_${GetColorblindColors().color4}] 
+                            text-black b-radius-[3%]`}
+          >
+            <TableContainer sx={{ maxWidth: 350, marginBottom: 2 }}>
               <Table sx={{ maxWidth: 350 }} aria-label="simple table">
                 <TableRow>
                   <TableCell align="left">Node ID:</TableCell>
@@ -533,6 +567,7 @@ export default function MapEditing() {
                   <TableCell align="left">X Coord:</TableCell>
                   <TableCell align="left">
                     <input
+                      className="bg-transparent"
                       value={editableNode?.Xcoord || ""}
                       onChange={(e) => {
                         editNodeDB(
@@ -550,6 +585,7 @@ export default function MapEditing() {
                   <TableCell align="left">Y Coord:</TableCell>
                   <TableCell align="left">
                     <input
+                      className="bg-transparent"
                       value={editableNode?.Ycoord || ""}
                       onChange={(e) => {
                         editNodeDB(
@@ -583,9 +619,7 @@ export default function MapEditing() {
                       disablePortal
                       id="combo-box-end"
                       options={["L1", "L2", "1", "2", "3"]}
-                      renderInput={(params) => (
-                        <TextField {...params} label="Floor" />
-                      )}
+                      renderInput={(params) => <TextField {...params} />}
                     />
                   </TableCell>
                 </TableRow>
@@ -615,9 +649,7 @@ export default function MapEditing() {
                         "Shapiro",
                         "Tower",
                       ]}
-                      renderInput={(params) => (
-                        <TextField {...params} label="Building" />
-                      )}
+                      renderInput={(params) => <TextField {...params} />}
                     />
                   </TableCell>
                 </TableRow>
@@ -655,9 +687,7 @@ export default function MapEditing() {
                         "STAI",
                         "STAI",
                       ]}
-                      renderInput={(params) => (
-                        <TextField {...params} label="Node Type" />
-                      )}
+                      renderInput={(params) => <TextField {...params} />}
                     />
                   </TableCell>
                 </TableRow>
@@ -665,6 +695,7 @@ export default function MapEditing() {
                   <TableCell align="left">Long Name:</TableCell>
                   <TableCell align="left">
                     <input
+                      className="bg-transparent"
                       value={editableNode?.LongName || ""}
                       onChange={(e) => {
                         editNodeDB(
@@ -682,6 +713,7 @@ export default function MapEditing() {
                   <TableCell align="left">Short Name:</TableCell>
                   <TableCell align="left">
                     <input
+                      className="bg-transparent"
                       value={editableNode?.ShortName || ""}
                       onChange={(e) => {
                         editNodeDB(
@@ -699,13 +731,18 @@ export default function MapEditing() {
             </TableContainer>
             <Box
               display="flex"
-              justifyContent="center"
+              justifyContent="right"
               alignItems="center"
               minHeight="5vh"
+              marginRight="5px"
+              className="pb-3 space-x-2 "
             >
               <Button
                 variant="contained"
-                color="error"
+                style={{
+                  backgroundColor: GetColorblindColors().color2,
+                  color: "white",
+                }}
                 onClick={() => {
                   delNodeDB("Single", nodeClicked.NodeID).then();
                   setNodeClicked(undefined);
@@ -723,14 +760,30 @@ export default function MapEditing() {
               >
                 Delete Node
               </Button>
+              <Button
+                variant="contained"
+                style={{
+                  backgroundColor: GetColorblindColors().color4,
+                  color: "white",
+                }}
+                onClick={() => {
+                  setNodeClicked(undefined);
+                }}
+              >
+                CANCEL
+              </Button>
             </Box>
           </div>
         )}
         {edgeClicked != undefined &&
           edgeClicked != defaultEdge &&
           !edgeLock && (
-            <div>
-              <TableContainer component={Paper} sx={{ marginBottom: 2 }}>
+            <div
+              className={`backdrop-blur-sm bg-secondary 
+                            border-[5px_solid_${GetColorblindColors().color4}] 
+                            text-black b-radius-[3%]`}
+            >
+              <TableContainer sx={{ marginBottom: 2 }}>
                 <Table sx={{ maxWidth: 350 }} aria-label="simple table">
                   <TableRow>
                     <TableCell align="left">Edge ID:</TableCell>
@@ -766,9 +819,7 @@ export default function MapEditing() {
                               node.NodeID != edgeClicked.StartNodeID,
                           )
                           .map((node: Nodes) => node.NodeID)}
-                        renderInput={(params) => (
-                          <TextField {...params} label="Start Node ID" />
-                        )}
+                        renderInput={(params) => <TextField {...params} />}
                       />
                     </TableCell>
                   </TableRow>
@@ -797,9 +848,7 @@ export default function MapEditing() {
                               node.NodeID != edgeClicked.EndNodeID,
                           )
                           .map((node: Nodes) => node.NodeID)}
-                        renderInput={(params) => (
-                          <TextField {...params} label="End Node ID" />
-                        )}
+                        renderInput={(params) => <TextField {...params} />}
                       />
                     </TableCell>
                   </TableRow>
@@ -807,13 +856,18 @@ export default function MapEditing() {
               </TableContainer>
               <Box
                 display="flex"
-                justifyContent="center"
+                justifyContent="right"
                 alignItems="center"
                 minHeight="5vh"
+                marginRight="5px"
+                className="pb-3 space-x-2"
               >
                 <Button
                   variant="contained"
-                  color="error"
+                  style={{
+                    backgroundColor: GetColorblindColors().color2,
+                    color: "white",
+                  }}
                   onClick={() => {
                     delEdgeDB("Single", edgeClicked.EdgeID).then();
                     setEdgeClicked(undefined);
@@ -826,6 +880,18 @@ export default function MapEditing() {
                 >
                   Delete Edge
                 </Button>
+                <Button
+                  variant="contained"
+                  style={{
+                    backgroundColor: GetColorblindColors().color4,
+                    color: "white",
+                  }}
+                  onClick={() => {
+                    setEdgeClicked(undefined);
+                  }}
+                >
+                  CANCEL
+                </Button>
               </Box>
             </div>
           )}
@@ -833,11 +899,24 @@ export default function MapEditing() {
           edgeClicked === undefined &&
           !addNodeFormFlag &&
           !addEdgeFormFlag) ||
-          edgeLock) && (
-          <div>
-            <p>Click on a Node or Edge to view its details</p>
-          </div>
-        )}
+          edgeLock) && <div></div>}
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: GetColorblindColors().color4,
+            color: "white",
+            "&:hover": {
+              backgroundColor: GetColorblindColors().color3,
+              color: GetColorblindColors().color4,
+            },
+          }}
+          onClick={() => {
+            routeChange("home");
+          }}
+        >
+          <DoneIcon />
+          {t("DONE EDITING")}
+        </Button>
       </aside>
     </div>
   );
