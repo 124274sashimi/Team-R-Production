@@ -7,8 +7,11 @@ export default {
         primary: "#012d5a",
         secondary: "#e4e4e4",
         tertiary: "#f6bd39",
-        translucentGrey: "rgb(103,124,143, 0.6)",
+        translucentGrey: "rgb(103,124,143,0.6)",
         teal: "#009CA6",
+        brown: "#874a22",
+        lightbrown: "#bf8056",
+        lightred: "#c25b5b",
       },
       fontFamily: {
         sans: ["Open Sans", "sans-serif"],
